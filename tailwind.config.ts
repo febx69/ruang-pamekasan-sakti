@@ -22,6 +22,7 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          dark: "hsl(var(--primary-dark))", // Tambahkan ini
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -52,16 +53,6 @@ export default {
           "green-dark": "hsl(var(--government-green-dark))",
           "green-light": "hsl(var(--government-green-light))",
           accent: "hsl(var(--government-accent))",
-        },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
         },
       },
       borderRadius: {
