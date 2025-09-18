@@ -65,7 +65,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Masukkan username"
                 required
-                className="transition-all duration-200 focus:ring-2 focus:ring-ring/50"
+                className="transition-all duration-200 focus-visible-ring"
               />
             </div>
             
@@ -78,7 +78,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Masukkan password"
                 required
-                className="transition-all duration-200 focus:ring-2 focus:ring-ring/50"
+                className="transition-all duration-200 focus-visible-ring"
               />
             </div>
 
