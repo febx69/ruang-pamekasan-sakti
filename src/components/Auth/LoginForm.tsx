@@ -35,7 +35,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-primary flex items-center justify-center p-4 animate-background-pan" style={{ backgroundSize: '200% 200%' }}>
-      <Card className="w-full max-w-md shadow-elevated animate-enter-from-bottom">
+      <Card className="w-full max-w-md shadow-elevated animate-enter-from-bottom border-none">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
             <img 
@@ -45,7 +45,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
             />
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold text-government-green">
+            <CardTitle className="text-2xl font-bold text-primary">
               Sistem Peminjaman Ruangan
             </CardTitle>
             <CardDescription className="mt-2">
@@ -90,7 +90,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
 
             <Button 
               type="submit" 
-              className="w-full bg-government-green hover:bg-government-green-dark transition-all duration-300 transform hover:scale-105"
+              className="w-full bg-primary hover:bg-primary/90 transition-all duration-300 transform hover:scale-105"
               disabled={isLoading}
             >
               {isLoading ? (
