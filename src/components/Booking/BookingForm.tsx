@@ -89,9 +89,9 @@ const BookingForm = ({ onSubmit }: BookingFormProps) => {
   };
 
   return (
-    <Card className="shadow-government">
+    <Card className="shadow-government border-none">
       <CardHeader>
-        <CardTitle className="flex items-center space-x-2 text-government-green">
+        <CardTitle className="flex items-center space-x-2 text-primary">
           <Plus size={20} />
           <span>Tambah Peminjaman Ruangan</span>
         </CardTitle>
@@ -108,18 +108,18 @@ const BookingForm = ({ onSubmit }: BookingFormProps) => {
                 <CalendarIcon size={16} />
                 <span>Tanggal</span>
               </Label>
-              <Input id="date" type="date" value={formData.date} onChange={(e) => setFormData(p => ({...p, date: e.target.value}))} required min={new Date().toISOString().split('T')[0]} className="focus:animate-input-glow" />
+              <Input id="date" type="date" value={formData.date} onChange={(e) => setFormData(p => ({...p, date: e.target.value}))} required min={new Date().toISOString().split('T')[0]} className="focus-visible-ring" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="name">Nama Peminjam</Label>
-              <Input id="name" type="text" value={formData.name} onChange={(e) => setFormData(p => ({...p, name: e.target.value}))} placeholder="Masukkan nama peminjam" required className="focus:animate-input-glow" />
+              <Input id="name" type="text" value={formData.name} onChange={(e) => setFormData(p => ({...p, name: e.target.value}))} placeholder="Masukkan nama peminjam" required className="focus-visible-ring" />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="room">Ruangan</Label>
             <Select value={formData.room} onValueChange={(value) => setFormData(p => ({...p, room: value}))}>
-              <SelectTrigger className="focus:animate-input-glow"><SelectValue placeholder="Pilih ruangan" /></SelectTrigger>
+              <SelectTrigger className="focus-visible-ring"><SelectValue placeholder="Pilih ruangan" /></SelectTrigger>
               <SelectContent>{rooms.map((room) => <SelectItem key={room} value={room}>{room}</SelectItem>)}</SelectContent>
             </Select>
           </div>
@@ -129,11 +129,11 @@ const BookingForm = ({ onSubmit }: BookingFormProps) => {
               <Label className="flex items-center space-x-1"><Clock size={16} /><span>Waktu Mulai</span></Label>
               <div className="flex gap-2">
                 <Select value={startTimeParts.hour} onValueChange={(value) => setStartTimeParts(p => ({...p, hour: value}))}>
-                  <SelectTrigger className="focus:animate-input-glow"><SelectValue placeholder="Jam" /></SelectTrigger>
+                  <SelectTrigger className="focus-visible-ring"><SelectValue placeholder="Jam" /></SelectTrigger>
                   <SelectContent>{hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
                 </Select>
                 <Select value={startTimeParts.minute} onValueChange={(value) => setStartTimeParts(p => ({...p, minute: value}))}>
-                  <SelectTrigger className="focus:animate-input-glow"><SelectValue placeholder="Menit" /></SelectTrigger>
+                  <SelectTrigger className="focus-visible-ring"><SelectValue placeholder="Menit" /></SelectTrigger>
                   <SelectContent>{minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
@@ -142,11 +142,11 @@ const BookingForm = ({ onSubmit }: BookingFormProps) => {
               <Label className="flex items-center space-x-1"><Clock size={16} /><span>Waktu Selesai</span></Label>
               <div className="flex gap-2">
                 <Select value={endTimeParts.hour} onValueChange={(value) => setEndTimeParts(p => ({...p, hour: value}))}>
-                  <SelectTrigger className="focus:animate-input-glow"><SelectValue placeholder="Jam" /></SelectTrigger>
+                  <SelectTrigger className="focus-visible-ring"><SelectValue placeholder="Jam" /></SelectTrigger>
                   <SelectContent>{hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
                 </Select>
                 <Select value={endTimeParts.minute} onValueChange={(value) => setEndTimeParts(p => ({...p, minute: value}))}>
-                  <SelectTrigger className="focus:animate-input-glow"><SelectValue placeholder="Menit" /></SelectTrigger>
+                  <SelectTrigger className="focus-visible-ring"><SelectValue placeholder="Menit" /></SelectTrigger>
                   <SelectContent>{minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
@@ -155,7 +155,7 @@ const BookingForm = ({ onSubmit }: BookingFormProps) => {
 
           <div className="space-y-2">
             <Label htmlFor="description">Keterangan</Label>
-            <Textarea id="description" value={formData.description} onChange={(e) => setFormData(p => ({...p, description: e.target.value}))} placeholder="Keterangan tambahan (opsional)" rows={3} className="resize-none focus:animate-input-glow" />
+            <Textarea id="description" value={formData.description} onChange={(e) => setFormData(p => ({...p, description: e.target.value}))} placeholder="Keterangan tambahan (opsional)" rows={3} className="resize-none focus-visible-ring" />
           </div>
 
           <Button type="submit" disabled={isSubmitting} className="w-full bg-primary hover:bg-primary/90 transition-all duration-300 transform hover:scale-105">
