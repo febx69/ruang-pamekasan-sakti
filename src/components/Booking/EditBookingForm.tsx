@@ -141,7 +141,7 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }: EditBookingFormProps) 
         <Button type="button" variant="outline" onClick={onCancel}>
           <X size={16} className="mr-2" />Batal
         </Button>
-        <Button type="submit" disabled={isSubmitting} className="bg-government-green hover:bg-government-green-dark">
+        <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90">
           {isSubmitting ? "Memproses..." : <><Save size={16} className="mr-2" />Simpan Perubahan</>}
         </Button>
       </div>
