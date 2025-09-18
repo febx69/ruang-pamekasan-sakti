@@ -8,7 +8,7 @@ import { LogIn } from "lucide-react";
 import logoImage from "@/assets/logo-pamekasan.png";
 
 interface LoginFormProps {
-  onLogin: (username: string, password: string) => boolean;
+  onLogin: (username: string, password: string) => Promise<boolean>;
 }
 
 const LoginForm = ({ onLogin }: LoginFormProps) => {
@@ -25,7 +25,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
     // Simulate loading time
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    const success = onLogin(username, password);
+    const success = await onLogin(username, password);
     if (!success) {
       setError("Username atau password tidak valid");
     }
@@ -106,14 +106,6 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
               )}
             </Button>
           </form>
-          
-          <div className="mt-6 p-4 bg-muted rounded-lg">
-            <p className="text-sm text-muted-foreground mb-2">Akun Demo:</p>
-            <div className="text-xs space-y-1">
-              <p><strong>Admin:</strong> username: admin, password: admin</p>
-              <p><strong>User:</strong> username: user, password: user</p>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>

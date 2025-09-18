@@ -20,7 +20,7 @@ export interface BookingData {
 }
 
 interface BookingFormProps {
-  onSubmit: (booking: Omit<BookingData, 'id' | 'createdAt'>) => void;
+  onSubmit: (booking: Omit<BookingData, 'id' | 'createdAt'>) => Promise<{ success: boolean; error?: string }>;
 }
 
 const rooms = [
@@ -31,6 +31,7 @@ const rooms = [
 
 const BookingForm = ({ onSubmit }: BookingFormProps) => {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     date: "",
     name: "",
@@ -40,7 +41,7 @@ const BookingForm = ({ onSubmit }: BookingFormProps) => {
     description: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation
@@ -62,22 +63,34 @@ const BookingForm = ({ onSubmit }: BookingFormProps) => {
       return;
     }
 
-    onSubmit(formData);
+    setIsSubmitting(true);
     
-    // Reset form
-    setFormData({
-      date: "",
-      name: "",
-      room: "",
-      startTime: "",
-      endTime: "",
-      description: ""
-    });
+    const result = await onSubmit(formData);
+    
+    if (result.success) {
+      // Reset form
+      setFormData({
+        date: "",
+        name: "",
+        room: "",
+        startTime: "",
+        endTime: "",
+        description: ""
+      });
 
-    toast({
-      title: "Berhasil",
-      description: "Peminjaman ruangan berhasil ditambahkan",
-    });
+      toast({
+        title: "Berhasil",
+        description: "Peminjaman ruangan berhasil ditambahkan",
+      });
+    } else {
+      toast({
+        title: "Gagal menambah peminjaman",
+        description: result.error || "Terjadi kesalahan yang tidak diketahui",
+        variant: "destructive"
+      });
+    }
+    
+    setIsSubmitting(false);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -191,10 +204,20 @@ const BookingForm = ({ onSubmit }: BookingFormProps) => {
 
           <Button 
             type="submit" 
+            disabled={isSubmitting}
             className="w-full bg-government-green hover:bg-government-green-dark transition-all duration-200"
           >
-            <Plus size={16} className="mr-2" />
-            Tambah Peminjaman
+            {isSubmitting ? (
+              <div className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Memproses...</span>
+              </div>
+            ) : (
+              <>
+                <Plus size={16} className="mr-2" />
+                Tambah Peminjaman
+              </>
+            )}
           </Button>
         </form>
       </CardContent>

@@ -16,12 +16,13 @@ const rooms = [
 
 interface EditBookingFormProps {
   booking: BookingData;
-  onSubmit: (data: Omit<BookingData, 'id' | 'createdAt'>) => void;
+  onSubmit: (data: Omit<BookingData, 'id' | 'createdAt'>) => Promise<{ success: boolean; error?: string }>;
   onCancel: () => void;
 }
 
 const EditBookingForm = ({ booking, onSubmit, onCancel }: EditBookingFormProps) => {
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     date: booking.date,
     name: booking.name,
@@ -31,7 +32,7 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }: EditBookingFormProps) 
     description: booking.description
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation
@@ -53,12 +54,24 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }: EditBookingFormProps) 
       return;
     }
 
-    onSubmit(formData);
+    setIsSubmitting(true);
     
-    toast({
-      title: "Berhasil",
-      description: "Peminjaman ruangan berhasil diperbarui",
-    });
+    const result = await onSubmit(formData);
+    
+    if (result.success) {
+      toast({
+        title: "Berhasil",
+        description: "Peminjaman ruangan berhasil diperbarui",
+      });
+    } else {
+      toast({
+        title: "Gagal memperbarui",
+        description: result.error || "Terjadi kesalahan yang tidak diketahui",
+        variant: "destructive"
+      });
+    }
+    
+    setIsSubmitting(false);
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -169,10 +182,20 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }: EditBookingFormProps) 
         </Button>
         <Button 
           type="submit"
+          disabled={isSubmitting}
           className="bg-government-green hover:bg-government-green-dark"
         >
-          <Save size={16} className="mr-2" />
-          Simpan Perubahan
+          {isSubmitting ? (
+            <div className="flex items-center space-x-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <span>Memproses...</span>
+            </div>
+          ) : (
+            <>
+              <Save size={16} className="mr-2" />
+              Simpan Perubahan
+            </>
+          )}
         </Button>
       </div>
     </form>

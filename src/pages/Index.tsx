@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useBookings } from "@/hooks/useBookings";
+import { useSupabaseAuth } from "@/hooks/useSupabaseAuth";
+import { useSupabaseBookings } from "@/hooks/useSupabaseBookings";
 import LoginForm from "@/components/Auth/LoginForm";
 import Header from "@/components/Layout/Header";
 import BookingForm, { BookingData } from "@/components/Booking/BookingForm";
@@ -9,8 +9,10 @@ import EditBookingForm from "@/components/Booking/EditBookingForm";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const Index = () => {
-  const { user, login, logout, isLoading } = useAuth();
+  const { user, login, logout, isLoading: authLoading } = useSupabaseAuth();
   const { 
+    bookings,
+    isLoading: bookingsLoading,
     addBooking, 
     updateBooking, 
     deleteBooking, 
@@ -18,17 +20,17 @@ const Index = () => {
     getActiveBookings, 
     getAllBookings, 
     exportToExcel 
-  } = useBookings();
+  } = useSupabaseBookings(user);
   
   const [editingBooking, setEditingBooking] = useState<BookingData | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const handleLogin = (username: string, password: string): boolean => {
-    return login(username, password);
+  const handleLogin = async (username: string, password: string): Promise<boolean> => {
+    return await login(username, password);
   };
 
-  const handleBookingSubmit = (bookingData: Omit<BookingData, 'id' | 'createdAt'>) => {
-    addBooking(bookingData);
+  const handleBookingSubmit = async (bookingData: Omit<BookingData, 'id' | 'createdAt'>) => {
+    return await addBooking(bookingData);
   };
 
   const handleEdit = (booking: BookingData) => {
@@ -36,15 +38,19 @@ const Index = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleEditSubmit = (updatedData: Omit<BookingData, 'id' | 'createdAt'>) => {
+  const handleEditSubmit = async (updatedData: Omit<BookingData, 'id' | 'createdAt'>) => {
     if (editingBooking) {
-      updateBooking(editingBooking.id, updatedData);
-      setIsEditDialogOpen(false);
-      setEditingBooking(null);
+      const result = await updateBooking(editingBooking.id, updatedData);
+      if (result.success) {
+        setIsEditDialogOpen(false);
+        setEditingBooking(null);
+      }
+      return result;
     }
+    return { success: false, error: 'No booking selected' };
   };
 
-  if (isLoading) {
+  if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-government-green"></div>
@@ -56,7 +62,7 @@ const Index = () => {
     return <LoginForm onLogin={handleLogin} />;
   }
 
-  const bookings = user.role === 'admin' ? getAllBookings() : getActiveBookings();
+  const displayBookings = user.role === 'admin' ? getAllBookings() : getActiveBookings();
   const listTitle = user.role === 'admin' ? 'Semua Peminjaman Ruangan' : 'Peminjaman Aktif';
 
   return (
@@ -67,13 +73,14 @@ const Index = () => {
         <BookingForm onSubmit={handleBookingSubmit} />
         
         <BookingList
-          bookings={bookings}
+          bookings={displayBookings}
           onDelete={user.role === 'admin' ? deleteBooking : undefined}
           onEdit={user.role === 'admin' ? handleEdit : undefined}
           onBulkDelete={user.role === 'admin' ? bulkDeleteByPeriod : undefined}
           onExport={user.role === 'admin' ? exportToExcel : undefined}
           userRole={user.role}
           title={listTitle}
+          isLoading={bookingsLoading}
         />
       </main>
 

@@ -10,12 +10,13 @@ import { useToast } from "@/hooks/use-toast";
 
 interface BookingListProps {
   bookings: BookingData[];
-  onDelete?: (id: string) => void;
+  onDelete?: (id: string) => Promise<{ success: boolean; error?: string }>;
   onEdit?: (booking: BookingData) => void;
-  onBulkDelete?: (period: 'month' | 'quarter' | 'year') => void;
+  onBulkDelete?: (period: 'month' | 'quarter' | 'year') => Promise<{ success: boolean; error?: string }>;
   onExport?: (period: 'month' | 'quarter' | 'year') => void;
   userRole: 'admin' | 'user';
   title: string;
+  isLoading?: boolean;
 }
 
 const BookingList = ({ 
@@ -25,7 +26,8 @@ const BookingList = ({
   onBulkDelete, 
   onExport, 
   userRole, 
-  title 
+  title,
+  isLoading = false
 }: BookingListProps) => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
@@ -55,21 +57,41 @@ const BookingList = ({
     }
   };
 
-  const handleDelete = (id: string, name: string) => {
-    onDelete?.(id);
-    toast({
-      title: "Berhasil dihapus",
-      description: `Peminjaman atas nama ${name} berhasil dihapus`,
-    });
+  const handleDelete = async (id: string, name: string) => {
+    if (!onDelete) return;
+    
+    const result = await onDelete(id);
+    if (result.success) {
+      toast({
+        title: "Berhasil dihapus",
+        description: `Peminjaman atas nama ${name} berhasil dihapus`,
+      });
+    } else {
+      toast({
+        title: "Gagal menghapus",
+        description: result.error || "Terjadi kesalahan",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleBulkDelete = (period: 'month' | 'quarter' | 'year') => {
-    onBulkDelete?.(period);
-    const periodText = period === 'month' ? 'bulan' : period === 'quarter' ? 'triwulan' : 'tahun';
-    toast({
-      title: "Berhasil dihapus",
-      description: `Data peminjaman periode ${periodText} berhasil dihapus`,
-    });
+  const handleBulkDelete = async (period: 'month' | 'quarter' | 'year') => {
+    if (!onBulkDelete) return;
+    
+    const result = await onBulkDelete(period);
+    if (result.success) {
+      const periodText = period === 'month' ? 'bulan' : period === 'quarter' ? 'triwulan' : 'tahun';
+      toast({
+        title: "Berhasil dihapus",
+        description: `Data peminjaman periode ${periodText} berhasil dihapus`,
+      });
+    } else {
+      toast({
+        title: "Gagal menghapus",
+        description: result.error || "Terjadi kesalahan",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleExport = (period: 'month' | 'quarter' | 'year') => {
@@ -228,7 +250,12 @@ const BookingList = ({
         </div>
 
         <div className="space-y-3">
-          {filteredBookings.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-government-green mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Memuat data...</p>
+            </div>
+          ) : filteredBookings.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Users size={48} className="mx-auto mb-4 opacity-50" />
               <p>Tidak ada data peminjaman</p>
