@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    /* TEMA BARU: MODERN SLATE */
-    --background: 220 20% 98%; /* Latar belakang abu-abu sangat terang */
+    /* TEMA BARU: MODERN SLATE - Disesuaikan */
+    --background: 220 20% 95%; /* Latar belakang abu-abu sedikit lebih gelap */
     --foreground: 222 47% 11%; /* Teks hitam kebiruan */
 
     --card: 220 20% 100%;
@@ -83,4 +83,23 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+}
+
+/* Custom focus ring for light theme inputs */
+/* Ini akan menghasilkan "lampu tipis remang-remang biru" */
+.focus-visible-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.3); /* Ring yang lebih terlihat */
+  border-color: hsl(var(--ring)); /* Border juga ikut berubah */
+}
+
+/* Override default focus-visible untuk input, select, textarea */
+input[type="text"].focus-visible-ring:focus-visible,
+input[type="password"].focus-visible-ring:focus-visible,
+input[type="date"].focus-visible-ring:focus-visible,
+textarea.focus-visible-ring:focus-visible,
+.select-trigger.focus-visible-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.3);
+  border-color: hsl(var(--ring));
 }
