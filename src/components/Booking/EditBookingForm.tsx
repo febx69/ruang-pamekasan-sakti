@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,9 +10,12 @@ import { useToast } from "@/hooks/use-toast";
 
 const rooms = [
   "Lantai 1 - Aula Mini",
-  "Lantai 2", 
+  "Lantai 2",
   "Lantai 3 - Aula Bhakti Husada"
 ];
+
+const hours = Array.from({ length: 15 }, (_, i) => (i + 7).toString().padStart(2, '0')); // 07 to 21
+const minutes = ["00", "15", "30", "45"];
 
 interface EditBookingFormProps {
   booking: BookingData;
@@ -23,6 +26,7 @@ interface EditBookingFormProps {
 const EditBookingForm = ({ booking, onSubmit, onCancel }: EditBookingFormProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [formData, setFormData] = useState({
     date: booking.date,
     name: booking.name,
@@ -32,10 +36,30 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }: EditBookingFormProps) 
     description: booking.description
   });
 
+  const [startTimeParts, setStartTimeParts] = useState({
+    hour: booking.startTime.slice(0, 2),
+    minute: booking.startTime.slice(3, 5)
+  });
+  const [endTimeParts, setEndTimeParts] = useState({
+    hour: booking.endTime.slice(0, 2),
+    minute: booking.endTime.slice(3, 5)
+  });
+
+  useEffect(() => {
+    if (startTimeParts.hour && startTimeParts.minute) {
+      handleInputChange('startTime', `${startTimeParts.hour}:${startTimeParts.minute}:00`);
+    }
+  }, [startTimeParts]);
+
+  useEffect(() => {
+    if (endTimeParts.hour && endTimeParts.minute) {
+      handleInputChange('endTime', `${endTimeParts.hour}:${endTimeParts.minute}:00`);
+    }
+  }, [endTimeParts]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation
     if (!formData.date || !formData.name || !formData.room || !formData.startTime || !formData.endTime) {
       toast({
         title: "Form tidak lengkap",
@@ -47,7 +71,7 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }: EditBookingFormProps) 
 
     if (formData.startTime >= formData.endTime) {
       toast({
-        title: "Waktu tidak valid", 
+        title: "Waktu tidak valid",
         description: "Waktu mulai harus lebih awal dari waktu selesai",
         variant: "destructive"
       });
@@ -133,14 +157,16 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }: EditBookingFormProps) 
             <Clock size={16} />
             <span>Waktu Mulai</span>
           </Label>
-          <Input
-            id="edit-startTime"
-            type="time"
-            value={formData.startTime}
-            onChange={(e) => handleInputChange("startTime", e.target.value)}
-            required
-            className="focus:ring-government-green"
-          />
+          <div className="flex gap-2">
+            <Select value={startTimeParts.hour} onValueChange={(value) => setStartTimeParts(p => ({...p, hour: value}))}>
+              <SelectTrigger><SelectValue placeholder="Jam" /></SelectTrigger>
+              <SelectContent>{hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
+            </Select>
+            <Select value={startTimeParts.minute} onValueChange={(value) => setStartTimeParts(p => ({...p, minute: value}))}>
+              <SelectTrigger><SelectValue placeholder="Menit" /></SelectTrigger>
+              <SelectContent>{minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -148,14 +174,16 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }: EditBookingFormProps) 
             <Clock size={16} />
             <span>Waktu Selesai</span>
           </Label>
-          <Input
-            id="edit-endTime"
-            type="time"
-            value={formData.endTime}
-            onChange={(e) => handleInputChange("endTime", e.target.value)}
-            required
-            className="focus:ring-government-green"
-          />
+          <div className="flex gap-2">
+            <Select value={endTimeParts.hour} onValueChange={(value) => setEndTimeParts(p => ({...p, hour: value}))}>
+              <SelectTrigger><SelectValue placeholder="Jam" /></SelectTrigger>
+              <SelectContent>{hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
+            </Select>
+            <Select value={endTimeParts.minute} onValueChange={(value) => setEndTimeParts(p => ({...p, minute: value}))}>
+              <SelectTrigger><SelectValue placeholder="Menit" /></SelectTrigger>
+              <SelectContent>{minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
