@@ -40,6 +40,7 @@ const BookingList = ({
       booking.date.includes(searchTerm)
     )
     .sort((a, b) => {
+      // Sort by date descending, then start time ascending
       const dateComparison = b.date.localeCompare(a.date);
       if (dateComparison !== 0) {
         return dateComparison;
@@ -107,10 +108,10 @@ const BookingList = ({
   };
 
   const getRoomColor = (room: string) => {
-    if (room.includes('Aula Mini')) return 'bg-blue-100 text-blue-800';
-    if (room.includes('Lantai 2')) return 'bg-green-100 text-green-800';
-    if (room.includes('Aula Bhakti')) return 'bg-purple-100 text-purple-800';
-    return 'bg-gray-100 text-gray-800';
+    if (room.includes('Aula Mini')) return 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200';
+    if (room.includes('Lantai 2')) return 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200';
+    if (room.includes('Aula Bhakti')) return 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200';
+    return 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-200';
   };
 
   const isActiveBooking = (booking: BookingData) => {
@@ -120,11 +121,11 @@ const BookingList = ({
   };
 
   return (
-    <Card className="shadow-government">
+    <Card className="shadow-government border-none">
       <CardHeader>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <CardTitle className="flex items-center space-x-2 text-government-green">
+            <CardTitle className="flex items-center space-x-2 text-primary">
               <Users size={20} />
               <span>{title}</span>
             </CardTitle>
@@ -180,7 +181,7 @@ const BookingList = ({
 
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="text-government-green border-government-green hover:bg-government-green hover:text-white">
+                  <Button variant="outline" size="sm" className="text-primary border-primary hover:bg-primary hover:text-primary-foreground">
                     <Download size={16} className="mr-2" />
                     Export Excel
                   </Button>
@@ -233,7 +234,7 @@ const BookingList = ({
               placeholder="Cari peminjaman..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
+              className="pl-9 focus:animate-input-glow"
             />
           </div>
         </div>
@@ -241,7 +242,7 @@ const BookingList = ({
         <div className="space-y-3">
           {isLoading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-government-green mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
               <p className="text-muted-foreground">Memuat data...</p>
             </div>
           ) : filteredBookings.length === 0 ? (
@@ -253,9 +254,9 @@ const BookingList = ({
             filteredBookings.map((booking, index) => (
               <div 
                 key={booking.id} 
-                className={`p-4 border rounded-lg transition-all duration-300 animate-enter-from-bottom opacity-0 hover:shadow-lg hover:border-government-green/50 hover:scale-[1.01] ${
+                className={`p-4 border rounded-lg transition-all duration-300 animate-enter-from-bottom opacity-0 hover:shadow-lg hover:border-primary/50 hover:scale-[1.01] ${
                   isActiveBooking(booking) 
-                    ? 'bg-government-green/5 border-government-green/30' 
+                    ? 'bg-primary/5 border-primary/20' 
                     : 'bg-card opacity-60'
                 }`}
                  style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'forwards' }}
@@ -263,9 +264,9 @@ const BookingList = ({
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-lg">{booking.name}</h3>
+                      <h3 className="font-semibold text-lg text-foreground">{booking.name}</h3>
                       {isActiveBooking(booking) ? (
-                        <Badge variant="secondary" className="bg-government-green text-white">
+                        <Badge variant="secondary" className="bg-primary text-primary-foreground">
                           Aktif
                         </Badge>
                       ) : (
@@ -295,7 +296,7 @@ const BookingList = ({
                     </div>
                     
                     {booking.description && (
-                      <p className="text-sm text-muted-foreground mt-2">
+                      <p className="text-sm text-foreground/80 mt-2">
                         {booking.description}
                       </p>
                     )}
@@ -307,7 +308,7 @@ const BookingList = ({
                         variant="outline"
                         size="sm"
                         onClick={() => onEdit?.(booking)}
-                        className="hover:bg-government-green hover:text-white"
+                        className="hover:bg-accent"
                       >
                         <Edit size={16} className="mr-1" />
                         Edit
