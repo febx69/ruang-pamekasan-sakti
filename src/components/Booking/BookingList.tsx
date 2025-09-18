@@ -124,11 +124,10 @@ const BookingList = ({
   };
 
   const isActiveBooking = (booking: BookingData) => {
-    const bookingDate = new Date(booking.date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return bookingDate >= today;
-  };
+    const now = new Date();
+    const endDateTime = new Date(`${booking.date}T${booking.endTime}`);
+    return endDateTime > now;
+};
 
   return (
     <Card className="shadow-government">
