@@ -217,17 +217,14 @@ export const useSupabaseBookings = (user: User | null) => {
   };
 
   const getActiveBookings = () => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const now = new Date(); // Waktu saat ini
     
     return bookings.filter(booking => {
-      const bookingDate = new Date(booking.date);
-      return bookingDate >= today;
+      // Menggabungkan tanggal dan jam selesai menjadi satu objek Date
+      const endDateTime = new Date(`${booking.date}T${booking.endTime}`);
+      // Peminjaman dianggap aktif jika waktu selesainya masih di masa depan
+      return endDateTime > now;
     });
-  };
-
-  const getAllBookings = () => {
-    return bookings;
   };
 
   const exportToExcel = async (period: 'month' | 'quarter' | 'year') => {
