@@ -64,48 +64,28 @@ const BookingForm = ({ onSubmit }: BookingFormProps) => {
     e.preventDefault();
     
     if (!formData.date || !formData.name || !formData.room || !formData.startTime || !formData.endTime) {
-      toast({
-        title: "Form tidak lengkap",
-        description: "Mohon isi semua field yang diperlukan",
-        variant: "destructive"
-      });
+      toast({ title: "Form tidak lengkap", description: "Mohon isi semua field yang diperlukan", variant: "destructive" });
       return;
     }
 
     if (formData.startTime >= formData.endTime) {
-      toast({
-        title: "Waktu tidak valid",
-        description: "Waktu mulai harus lebih awal dari waktu selesai",
-        variant: "destructive"
-      });
+      toast({ title: "Waktu tidak valid", description: "Waktu mulai harus lebih awal dari waktu selesai", variant: "destructive" });
       return;
     }
 
     setIsSubmitting(true);
-    
     const result = await onSubmit(formData);
     
     if (result.success) {
       setFormData({ date: "", name: "", room: "", startTime: "", endTime: "", description: "" });
       setStartTimeParts({ hour: "", minute: "" });
       setEndTimeParts({ hour: "", minute: "" });
-      toast({
-        title: "Berhasil",
-        description: "Peminjaman ruangan berhasil ditambahkan",
-      });
+      toast({ title: "Berhasil", description: "Peminjaman ruangan berhasil ditambahkan" });
     } else {
-      toast({
-        title: "Gagal menambah peminjaman",
-        description: result.error || "Terjadi kesalahan yang tidak diketahui",
-        variant: "destructive"
-      });
+      toast({ title: "Gagal menambah peminjaman", description: result.error || "Terjadi kesalahan", variant: "destructive" });
     }
     
     setIsSubmitting(false);
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -128,77 +108,45 @@ const BookingForm = ({ onSubmit }: BookingFormProps) => {
                 <CalendarIcon size={16} />
                 <span>Tanggal</span>
               </Label>
-              <Input
-                id="date"
-                type="date"
-                value={formData.date}
-                onChange={(e) => handleInputChange("date", e.target.value)}
-                required
-                min={new Date().toISOString().split('T')[0]}
-                className="focus:ring-government-green"
-              />
+              <Input id="date" type="date" value={formData.date} onChange={(e) => setFormData(p => ({...p, date: e.target.value}))} required min={new Date().toISOString().split('T')[0]} className="focus:animate-input-glow" />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="name">Nama Peminjam</Label>
-              <Input
-                id="name"
-                type="text"
-                value={formData.name}
-                onChange={(e) => handleInputChange("name", e.target.value)}
-                placeholder="Masukkan nama peminjam"
-                required
-                className="focus:ring-government-green"
-              />
+              <Input id="name" type="text" value={formData.name} onChange={(e) => setFormData(p => ({...p, name: e.target.value}))} placeholder="Masukkan nama peminjam" required className="focus:animate-input-glow" />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="room">Ruangan</Label>
-            <Select value={formData.room} onValueChange={(value) => handleInputChange("room", value)}>
-              <SelectTrigger className="focus:ring-government-green">
-                <SelectValue placeholder="Pilih ruangan" />
-              </SelectTrigger>
-              <SelectContent>
-                {rooms.map((room) => (
-                  <SelectItem key={room} value={room}>
-                    {room}
-                  </SelectItem>
-                ))}
-              </SelectContent>
+            <Select value={formData.room} onValueChange={(value) => setFormData(p => ({...p, room: value}))}>
+              <SelectTrigger className="focus:animate-input-glow"><SelectValue placeholder="Pilih ruangan" /></SelectTrigger>
+              <SelectContent>{rooms.map((room) => <SelectItem key={room} value={room}>{room}</SelectItem>)}</SelectContent>
             </Select>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="startTime" className="flex items-center space-x-1">
-                <Clock size={16} />
-                <span>Waktu Mulai</span>
-              </Label>
+              <Label className="flex items-center space-x-1"><Clock size={16} /><span>Waktu Mulai</span></Label>
               <div className="flex gap-2">
                 <Select value={startTimeParts.hour} onValueChange={(value) => setStartTimeParts(p => ({...p, hour: value}))}>
-                  <SelectTrigger><SelectValue placeholder="Jam" /></SelectTrigger>
+                  <SelectTrigger className="focus:animate-input-glow"><SelectValue placeholder="Jam" /></SelectTrigger>
                   <SelectContent>{hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
                 </Select>
                 <Select value={startTimeParts.minute} onValueChange={(value) => setStartTimeParts(p => ({...p, minute: value}))}>
-                  <SelectTrigger><SelectValue placeholder="Menit" /></SelectTrigger>
+                  <SelectTrigger className="focus:animate-input-glow"><SelectValue placeholder="Menit" /></SelectTrigger>
                   <SelectContent>{minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="endTime" className="flex items-center space-x-1">
-                <Clock size={16} />
-                <span>Waktu Selesai</span>
-              </Label>
-               <div className="flex gap-2">
+              <Label className="flex items-center space-x-1"><Clock size={16} /><span>Waktu Selesai</span></Label>
+              <div className="flex gap-2">
                 <Select value={endTimeParts.hour} onValueChange={(value) => setEndTimeParts(p => ({...p, hour: value}))}>
-                  <SelectTrigger><SelectValue placeholder="Jam" /></SelectTrigger>
+                  <SelectTrigger className="focus:animate-input-glow"><SelectValue placeholder="Jam" /></SelectTrigger>
                   <SelectContent>{hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
                 </Select>
                 <Select value={endTimeParts.minute} onValueChange={(value) => setEndTimeParts(p => ({...p, minute: value}))}>
-                  <SelectTrigger><SelectValue placeholder="Menit" /></SelectTrigger>
+                  <SelectTrigger className="focus:animate-input-glow"><SelectValue placeholder="Menit" /></SelectTrigger>
                   <SelectContent>{minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
@@ -207,32 +155,11 @@ const BookingForm = ({ onSubmit }: BookingFormProps) => {
 
           <div className="space-y-2">
             <Label htmlFor="description">Keterangan</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              placeholder="Keterangan tambahan (opsional)"
-              rows={3}
-              className="focus:ring-government-green resize-none"
-            />
+            <Textarea id="description" value={formData.description} onChange={(e) => setFormData(p => ({...p, description: e.target.value}))} placeholder="Keterangan tambahan (opsional)" rows={3} className="resize-none focus:animate-input-glow" />
           </div>
 
-          <Button 
-            type="submit" 
-            disabled={isSubmitting}
-            className="w-full bg-government-green hover:bg-government-green-dark transition-all duration-200"
-          >
-            {isSubmitting ? (
-              <div className="flex items-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                <span>Memproses...</span>
-              </div>
-            ) : (
-              <>
-                <Plus size={16} className="mr-2" />
-                Tambah Peminjaman
-              </>
-            )}
+          <Button type="submit" disabled={isSubmitting} className="w-full bg-government-green hover:bg-government-green-dark transition-all duration-300 transform hover:scale-105">
+            {isSubmitting ? "Memproses..." : <><Plus size={16} className="mr-2" />Tambah Peminjaman</>}
           </Button>
         </form>
       </CardContent>
