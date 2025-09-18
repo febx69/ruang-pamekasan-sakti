@@ -34,7 +34,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-primary flex items-center justify-center p-4 animate-background-pan" style={{ backgroundSize: '200% 200%' }}>
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-elevated animate-enter-from-bottom border-none">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
@@ -65,7 +65,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Masukkan username"
                 required
-                className="transition-all duration-200 focus:animate-input-glow"
+                className="transition-all duration-200 focus:ring-2 focus:ring-ring/50"
               />
             </div>
             
@@ -78,7 +78,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Masukkan password"
                 required
-                className="transition-all duration-200 focus:animate-input-glow"
+                className="transition-all duration-200 focus:ring-2 focus:ring-ring/50"
               />
             </div>
 
