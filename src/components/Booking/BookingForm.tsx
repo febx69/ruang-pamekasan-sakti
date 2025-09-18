@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarIcon, Clock, Plus } from "lucide-react";
+import { CalendarIcon, Clock, Plus, User } from "lucide-react"; // <-- Tambahkan User icon
 import { useToast } from "@/hooks/use-toast";
 
 export interface BookingData {
@@ -110,8 +110,12 @@ const BookingForm = ({ onSubmit }: BookingFormProps) => {
               </Label>
               <Input id="date" type="date" value={formData.date} onChange={(e) => setFormData(p => ({...p, date: e.target.value}))} required min={new Date().toISOString().split('T')[0]} className="focus-visible-ring" />
             </div>
+            {/* INI BAGIAN YANG DIPERBAIKI */}
             <div className="space-y-2">
-              <Label htmlFor="name">Nama Peminjam</Label>
+              <Label htmlFor="name" className="flex items-center space-x-1">
+                <User size={16} />
+                <span>Nama Peminjam</span>
+              </Label>
               <Input id="name" type="text" value={formData.name} onChange={(e) => setFormData(p => ({...p, name: e.target.value}))} placeholder="Masukkan nama peminjam" required className="focus-visible-ring" />
             </div>
           </div>
@@ -119,7 +123,7 @@ const BookingForm = ({ onSubmit }: BookingFormProps) => {
           <div className="space-y-2">
             <Label htmlFor="room">Ruangan</Label>
             <Select value={formData.room} onValueChange={(value) => setFormData(p => ({...p, room: value}))}>
-              <SelectTrigger className="focus-visible-ring"><SelectValue placeholder="Pilih ruangan" /></SelectTrigger>
+              <SelectTrigger className="focus-visible-ring select-trigger"><SelectValue placeholder="Pilih ruangan" /></SelectTrigger>
               <SelectContent>{rooms.map((room) => <SelectItem key={room} value={room}>{room}</SelectItem>)}</SelectContent>
             </Select>
           </div>
@@ -129,11 +133,11 @@ const BookingForm = ({ onSubmit }: BookingFormProps) => {
               <Label className="flex items-center space-x-1"><Clock size={16} /><span>Waktu Mulai</span></Label>
               <div className="flex gap-2">
                 <Select value={startTimeParts.hour} onValueChange={(value) => setStartTimeParts(p => ({...p, hour: value}))}>
-                  <SelectTrigger className="focus-visible-ring"><SelectValue placeholder="Jam" /></SelectTrigger>
+                  <SelectTrigger className="focus-visible-ring select-trigger"><SelectValue placeholder="Jam" /></SelectTrigger>
                   <SelectContent>{hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
                 </Select>
                 <Select value={startTimeParts.minute} onValueChange={(value) => setStartTimeParts(p => ({...p, minute: value}))}>
-                  <SelectTrigger className="focus-visible-ring"><SelectValue placeholder="Menit" /></SelectTrigger>
+                  <SelectTrigger className="focus-visible-ring select-trigger"><SelectValue placeholder="Menit" /></SelectTrigger>
                   <SelectContent>{minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
@@ -142,11 +146,11 @@ const BookingForm = ({ onSubmit }: BookingFormProps) => {
               <Label className="flex items-center space-x-1"><Clock size={16} /><span>Waktu Selesai</span></Label>
               <div className="flex gap-2">
                 <Select value={endTimeParts.hour} onValueChange={(value) => setEndTimeParts(p => ({...p, hour: value}))}>
-                  <SelectTrigger className="focus-visible-ring"><SelectValue placeholder="Jam" /></SelectTrigger>
+                  <SelectTrigger className="focus-visible-ring select-trigger"><SelectValue placeholder="Jam" /></SelectTrigger>
                   <SelectContent>{hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
                 </Select>
                 <Select value={endTimeParts.minute} onValueChange={(value) => setEndTimeParts(p => ({...p, minute: value}))}>
-                  <SelectTrigger className="focus-visible-ring"><SelectValue placeholder="Menit" /></SelectTrigger>
+                  <SelectTrigger className="focus-visible-ring select-trigger"><SelectValue placeholder="Menit" /></SelectTrigger>
                   <SelectContent>{minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
