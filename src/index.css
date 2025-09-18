@@ -2,117 +2,82 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 220 13% 97%; /* Latar belakang sedikit keabu-abuan */
-    --foreground: 210 60% 8%;
+    /* TEMA BARU: Biru Sehat (Lebih nyaman di mata) */
+    --background: 210 40% 98%; /* Latar belakang putih kebiruan */
+    --foreground: 215 28% 17%; /* Teks biru tua */
 
-    --card: 0 0% 100%;
-    --card-foreground: 210 60% 8%;
+    --card: 210 40% 100%;
+    --card-foreground: 215 28% 17%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 60% 8%;
+    --popover: 210 40% 100%;
+    --popover-foreground: 215 28% 17%;
 
-    --primary: 142 65% 45%; /* Hijau yang lebih teduh */
+    /* Primary tetap hijau sebagai identitas */
+    --primary: 142 65% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 142 30% 95%;
-    --secondary-foreground: 142 69% 25%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 215 28% 17%;
 
-    --muted: 142 15% 94%;
-    --muted-foreground: 142 8% 46%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 216 12% 47%;
 
-    --accent: 45 93% 47%;
-    --accent-foreground: 210 60% 8%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 215 28% 17%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 142 20% 88%;
-    --input: 142 20% 94%;
-    --ring: 142 65% 45%; /* Disesuaikan dengan warna primer baru */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 142 65% 45%; /* Ring tetap hijau */
 
-    --government-green: 142 65% 45%; /* Disesuaikan dengan warna primer baru */
-    --government-green-dark: 142 65% 35%; /* Disesuaikan dengan warna primer baru */
-    --government-green-light: 142 65% 65%; /* Disesuaikan dengan warna primer baru */
+    /* Warna khas pemerintah disesuaikan */
+    --government-green: 142 65% 45%;
+    --government-green-dark: 142 65% 35%;
+    --government-green-light: 142 65% 65%;
     --government-accent: 45 93% 47%;
     
-    --gradient-primary: linear-gradient(135deg, hsl(var(--government-green)), hsl(var(--government-green-light)));
-    --gradient-header: linear-gradient(90deg, hsl(var(--government-green)), hsl(var(--government-green-dark)));
+    --gradient-primary: linear-gradient(135deg, hsl(210, 40%, 96.1%), hsl(0, 0%, 100%));
+    --gradient-header: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary-dark)));
     
-    --shadow-government: 0 4px 20px -4px hsl(var(--government-green) / 0.25);
-    --shadow-elevated: 0 8px 30px -8px hsl(var(--government-green) / 0.3);
+    --shadow-government: 0 4px 20px -4px hsl(var(--primary) / 0.25);
+    --shadow-elevated: 0 8px 30px -8px hsl(var(--primary) / 0.3);
 
     --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
+    /* Dark mode tidak diubah, sudah nyaman */
     --background: 210 60% 8%;
     --foreground: 0 0% 98%;
-
     --card: 210 50% 12%;
     --card-foreground: 0 0% 98%;
-
     --popover: 210 50% 12%;
     --popover-foreground: 0 0% 98%;
-
     --primary: 142 69% 58%;
     --primary-foreground: 0 0% 100%;
-
     --secondary: 210 40% 20%;
     --secondary-foreground: 0 0% 98%;
-
     --muted: 210 40% 20%;
     --muted-foreground: 210 15% 70%;
-
     --accent: 45 93% 47%;
     --accent-foreground: 210 60% 8%;
-
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 98%;
-
     --border: 210 40% 25%;
     --input: 210 40% 20%;
     --ring: 142 69% 58%;
-
     --government-green: 142 69% 58%;
     --government-green-dark: 142 69% 35%;
     --government-green-light: 142 69% 65%;
     --government-accent: 45 93% 47%;
-    
     --gradient-primary: linear-gradient(135deg, hsl(var(--government-green)), hsl(var(--government-green-dark)));
     --gradient-header: linear-gradient(90deg, hsl(var(--government-green-dark)), hsl(var(--government-green)));
-    
     --shadow-government: 0 4px 20px -4px hsl(var(--government-green) / 0.4);
     --shadow-elevated: 0 8px 30px -8px hsl(var(--government-green) / 0.5);
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
