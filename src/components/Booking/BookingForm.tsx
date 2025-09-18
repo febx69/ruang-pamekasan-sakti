@@ -158,7 +158,7 @@ const BookingForm = ({ onSubmit }: BookingFormProps) => {
             <Textarea id="description" value={formData.description} onChange={(e) => setFormData(p => ({...p, description: e.target.value}))} placeholder="Keterangan tambahan (opsional)" rows={3} className="resize-none focus:animate-input-glow" />
           </div>
 
-          <Button type="submit" disabled={isSubmitting} className="w-full bg-government-green hover:bg-government-green-dark transition-all duration-300 transform hover:scale-105">
+          <Button type="submit" disabled={isSubmitting} className="w-full bg-primary hover:bg-primary/90 transition-all duration-300 transform hover:scale-105">
             {isSubmitting ? "Memproses..." : <><Plus size={16} className="mr-2" />Tambah Peminjaman</>}
           </Button>
         </form>
