@@ -12,7 +12,10 @@ interface HeaderProps {
 
 const Header = ({ user, onLogout }: HeaderProps) => {
   return (
-    <header className="bg-card shadow-sm border-b sticky top-0 z-50">
+    <header 
+      className="bg-gradient-header shadow-government border-b border-primary/20 text-white animate-background-pan"
+      style={{ backgroundSize: '200% 200%' }}
+    >
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -21,11 +24,11 @@ const Header = ({ user, onLogout }: HeaderProps) => {
               alt="Logo Kabupaten Pamekasan" 
               className="h-12 w-12 object-contain"
             />
-            <div className="text-foreground">
-              <h1 className="text-xl font-bold tracking-tight text-foreground">
-                Sistem Peminjaman Ruangan
+            <div>
+              <h1 className="text-xl font-bold tracking-tight">
+                Sistem Manajemen Peminjaman Ruangan
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-white/90">
                 Dinas Kesehatan Kabupaten Pamekasan
               </p>
             </div>
@@ -33,18 +36,18 @@ const Header = ({ user, onLogout }: HeaderProps) => {
           
           {user && (
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-foreground">
+              <div className="flex items-center space-x-2">
                 <User size={18} />
                 <div className="text-sm">
                   <p className="font-medium">{user.username}</p>
-                  <p className="text-muted-foreground text-xs capitalize">{user.role}</p>
+                  <p className="text-white/80 text-xs capitalize">{user.role}</p>
                 </div>
               </div>
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={onLogout}
-                className="transition-all duration-300 transform hover:scale-105"
+                className="border-white/30 bg-white/20 text-white hover:bg-white/30 hover:text-white transition-all duration-300 transform hover:scale-105"
               >
                 <LogOut size={16} className="mr-2" />
                 Logout
