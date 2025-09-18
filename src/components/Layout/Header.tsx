@@ -26,8 +26,13 @@ const Header = ({ user, onLogout }: HeaderProps) => {
               className="h-10 w-10 md:h-12 md:w-12 object-contain"
             />
             <div className="flex flex-col justify-center">
-              <h1 className="text-sm sm:text-lg md:text-xl font-bold tracking-tight leading-tight truncate">
+              {/* Judul untuk Mobile (<768px) */}
+              <h1 className="text-lg font-bold tracking-tight leading-tight truncate md:hidden">
                 Peminjaman Ruangan
+              </h1>
+              {/* Judul untuk Desktop (>=768px) */}
+              <h1 className="hidden md:block text-xl font-bold tracking-tight">
+                Sistem Manajemen Peminjaman Ruangan
               </h1>
               <p className="hidden sm:block text-xs md:text-sm text-white/90">
                 Dinas Kesehatan Pamekasan
