@@ -96,11 +96,25 @@ export default {
             transform: "translateY(0)"
           }
         },
+        // Animasi baru untuk efek cahaya
+        "input-glow": {
+          "0%": { boxShadow: "0 0 0 0 hsl(var(--ring) / 0.4)" },
+          "70%": { boxShadow: "0 0 0 6px hsl(var(--ring) / 0)" },
+          "100%": { boxShadow: "0 0 0 0 hsl(var(--ring) / 0)" }
+        },
+        "background-pan": {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" }
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "enter-from-bottom": "enter-from-bottom 0.4s ease-out",
+        // Animasi baru
+        "input-glow": "input-glow 1.5s ease-out",
+        "background-pan": "background-pan 15s ease infinite",
       },
     },
   },
