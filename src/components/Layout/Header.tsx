@@ -13,30 +13,32 @@ interface HeaderProps {
 const Header = ({ user, onLogout }: HeaderProps) => {
   return (
     <header 
-      className="bg-gradient-header shadow-government border-b border-primary/20 text-white animate-background-pan"
+      className="bg-gradient-header shadow-government border-b border-primary/20 text-white animate-background-pan sticky top-0 z-50"
       style={{ backgroundSize: '200% 200%' }}
     >
       <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+        <div className="flex items-center justify-between gap-2">
+          {/* Bagian Kiri: Logo dan Judul */}
+          <div className="flex flex-shrink-0 items-center space-x-3 min-w-0">
             <img 
               src={logoImage} 
               alt="Logo Kabupaten Pamekasan" 
-              className="h-12 w-12 object-contain"
+              className="h-10 w-10 md:h-12 md:w-12 object-contain"
             />
-            <div>
-              <h1 className="text-xl font-bold tracking-tight">
-                Sistem Manajemen Peminjaman Ruangan
+            <div className="flex flex-col justify-center">
+              <h1 className="text-sm sm:text-lg md:text-xl font-bold tracking-tight leading-tight truncate">
+                Peminjaman Ruangan
               </h1>
-              <p className="text-sm text-white/90">
-                Dinas Kesehatan Kabupaten Pamekasan
+              <p className="hidden sm:block text-xs md:text-sm text-white/90">
+                Dinas Kesehatan Pamekasan
               </p>
             </div>
           </div>
           
+          {/* Bagian Kanan: User dan Tombol Logout */}
           {user && (
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
+            <div className="flex flex-shrink-0 items-center space-x-2 md:space-x-4">
+              <div className="hidden sm:flex items-center space-x-2">
                 <User size={18} />
                 <div className="text-sm">
                   <p className="font-medium">{user.username}</p>
@@ -49,8 +51,8 @@ const Header = ({ user, onLogout }: HeaderProps) => {
                 onClick={onLogout}
                 className="border-white/30 bg-white/20 text-white hover:bg-white/30 hover:text-white transition-all duration-300 transform hover:scale-105"
               >
-                <LogOut size={16} className="mr-2" />
-                Logout
+                <LogOut size={16} />
+                <span className="hidden sm:inline ml-2">Logout</span>
               </Button>
             </div>
           )}
