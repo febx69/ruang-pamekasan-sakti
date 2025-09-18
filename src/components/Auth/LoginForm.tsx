@@ -34,8 +34,8 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-primary flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-elevated">
+    <div className="min-h-screen bg-gradient-primary flex items-center justify-center p-4 animate-background-pan" style={{ backgroundSize: '200% 200%' }}>
+      <Card className="w-full max-w-md shadow-elevated animate-enter-from-bottom">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
             <img 
@@ -65,7 +65,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Masukkan username"
                 required
-                className="transition-all duration-200 focus:ring-government-green"
+                className="transition-all duration-200 focus:animate-input-glow"
               />
             </div>
             
@@ -78,19 +78,19 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Masukkan password"
                 required
-                className="transition-all duration-200 focus:ring-government-green"
+                className="transition-all duration-200 focus:animate-input-glow"
               />
             </div>
 
             {error && (
-              <Alert variant="destructive" className="animate-fade-in">
+              <Alert variant="destructive" className="animate-enter-from-bottom">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
             <Button 
               type="submit" 
-              className="w-full bg-government-green hover:bg-government-green-dark transition-all duration-200"
+              className="w-full bg-government-green hover:bg-government-green-dark transition-all duration-300 transform hover:scale-105"
               disabled={isLoading}
             >
               {isLoading ? (
