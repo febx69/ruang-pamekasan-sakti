@@ -38,7 +38,7 @@ const BookingList = ({
     .filter(booking => 
       booking.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.room.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (booking.description && booking.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
       booking.date.includes(searchTerm)
     )
     .sort((a, b) => {
@@ -127,7 +127,7 @@ const BookingList = ({
     const now = new Date();
     const endDateTime = new Date(`${booking.date}T${booking.endTime}`);
     return endDateTime > now;
-};
+  };
 
   return (
     <Card className="shadow-government">
@@ -266,14 +266,13 @@ const BookingList = ({
                 className={`p-4 border rounded-lg transition-all duration-200 hover:shadow-md ${
                   isActiveBooking(booking) 
                     ? 'bg-government-green/5 border-government-green/30' 
-                    : 'bg-card opacity-60' // Tambahkan opacity untuk peminjaman yang sudah selesai
+                    : 'bg-card opacity-60'
                 }`}
               >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold text-lg">{booking.name}</h3>
-                      {/* Logika untuk menampilkan badge "Aktif" atau "Selesai" */}
                       {isActiveBooking(booking) ? (
                         <Badge variant="secondary" className="bg-government-green text-white">
                           Aktif
