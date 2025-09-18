@@ -47,13 +47,13 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }: EditBookingFormProps) 
 
   useEffect(() => {
     if (startTimeParts.hour && startTimeParts.minute) {
-      handleInputChange('startTime', `${startTimeParts.hour}:${startTimeParts.minute}:00`);
+      setFormData(prev => ({ ...prev, startTime: `${startTimeParts.hour}:${startTimeParts.minute}:00` }));
     }
   }, [startTimeParts]);
 
   useEffect(() => {
     if (endTimeParts.hour && endTimeParts.minute) {
-      handleInputChange('endTime', `${endTimeParts.hour}:${endTimeParts.minute}:00`);
+      setFormData(prev => ({ ...prev, endTime: `${endTimeParts.hour}:${endTimeParts.minute}:00` }));
     }
   }, [endTimeParts]);
 
@@ -61,126 +61,71 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }: EditBookingFormProps) 
     e.preventDefault();
     
     if (!formData.date || !formData.name || !formData.room || !formData.startTime || !formData.endTime) {
-      toast({
-        title: "Form tidak lengkap",
-        description: "Mohon isi semua field yang diperlukan",
-        variant: "destructive"
-      });
+      toast({ title: "Form tidak lengkap", description: "Mohon isi semua field yang diperlukan", variant: "destructive" });
       return;
     }
 
     if (formData.startTime >= formData.endTime) {
-      toast({
-        title: "Waktu tidak valid",
-        description: "Waktu mulai harus lebih awal dari waktu selesai",
-        variant: "destructive"
-      });
+      toast({ title: "Waktu tidak valid", description: "Waktu mulai harus lebih awal dari waktu selesai", variant: "destructive" });
       return;
     }
 
     setIsSubmitting(true);
-    
     const result = await onSubmit(formData);
     
     if (result.success) {
-      toast({
-        title: "Berhasil",
-        description: "Peminjaman ruangan berhasil diperbarui",
-      });
+      toast({ title: "Berhasil", description: "Peminjaman ruangan berhasil diperbarui" });
     } else {
-      toast({
-        title: "Gagal memperbarui",
-        description: result.error || "Terjadi kesalahan yang tidak diketahui",
-        variant: "destructive"
-      });
+      toast({ title: "Gagal memperbarui", description: result.error || "Terjadi kesalahan", variant: "destructive" });
     }
     
     setIsSubmitting(false);
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="edit-date" className="flex items-center space-x-1">
-            <CalendarIcon size={16} />
-            <span>Tanggal</span>
-          </Label>
-          <Input
-            id="edit-date"
-            type="date"
-            value={formData.date}
-            onChange={(e) => handleInputChange("date", e.target.value)}
-            required
-            min={new Date().toISOString().split('T')[0]}
-            className="focus:ring-government-green"
-          />
+          <Label htmlFor="edit-date" className="flex items-center space-x-1"><CalendarIcon size={16} /><span>Tanggal</span></Label>
+          <Input id="edit-date" type="date" value={formData.date} onChange={(e) => setFormData(p => ({...p, date: e.target.value}))} required className="focus:animate-input-glow" />
         </div>
-
         <div className="space-y-2">
           <Label htmlFor="edit-name">Nama Peminjam</Label>
-          <Input
-            id="edit-name"
-            type="text"
-            value={formData.name}
-            onChange={(e) => handleInputChange("name", e.target.value)}
-            placeholder="Masukkan nama peminjam"
-            required
-            className="focus:ring-government-green"
-          />
+          <Input id="edit-name" type="text" value={formData.name} onChange={(e) => setFormData(p => ({...p, name: e.target.value}))} required className="focus:animate-input-glow" />
         </div>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="edit-room">Ruangan</Label>
-        <Select value={formData.room} onValueChange={(value) => handleInputChange("room", value)}>
-          <SelectTrigger className="focus:ring-government-green">
-            <SelectValue placeholder="Pilih ruangan" />
-          </SelectTrigger>
-          <SelectContent>
-            {rooms.map((room) => (
-              <SelectItem key={room} value={room}>
-                {room}
-              </SelectItem>
-            ))}
-          </SelectContent>
+        <Select value={formData.room} onValueChange={(value) => setFormData(p => ({...p, room: value}))}>
+          <SelectTrigger className="focus:animate-input-glow"><SelectValue placeholder="Pilih ruangan" /></SelectTrigger>
+          <SelectContent>{rooms.map((room) => <SelectItem key={room} value={room}>{room}</SelectItem>)}</SelectContent>
         </Select>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="edit-startTime" className="flex items-center space-x-1">
-            <Clock size={16} />
-            <span>Waktu Mulai</span>
-          </Label>
+          <Label className="flex items-center space-x-1"><Clock size={16} /><span>Waktu Mulai</span></Label>
           <div className="flex gap-2">
             <Select value={startTimeParts.hour} onValueChange={(value) => setStartTimeParts(p => ({...p, hour: value}))}>
-              <SelectTrigger><SelectValue placeholder="Jam" /></SelectTrigger>
+              <SelectTrigger className="focus:animate-input-glow"><SelectValue placeholder="Jam" /></SelectTrigger>
               <SelectContent>{hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
             </Select>
             <Select value={startTimeParts.minute} onValueChange={(value) => setStartTimeParts(p => ({...p, minute: value}))}>
-              <SelectTrigger><SelectValue placeholder="Menit" /></SelectTrigger>
+              <SelectTrigger className="focus:animate-input-glow"><SelectValue placeholder="Menit" /></SelectTrigger>
               <SelectContent>{minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
             </Select>
           </div>
         </div>
-
         <div className="space-y-2">
-          <Label htmlFor="edit-endTime" className="flex items-center space-x-1">
-            <Clock size={16} />
-            <span>Waktu Selesai</span>
-          </Label>
+          <Label className="flex items-center space-x-1"><Clock size={16} /><span>Waktu Selesai</span></Label>
           <div className="flex gap-2">
             <Select value={endTimeParts.hour} onValueChange={(value) => setEndTimeParts(p => ({...p, hour: value}))}>
-              <SelectTrigger><SelectValue placeholder="Jam" /></SelectTrigger>
+              <SelectTrigger className="focus:animate-input-glow"><SelectValue placeholder="Jam" /></SelectTrigger>
               <SelectContent>{hours.map(h => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
             </Select>
             <Select value={endTimeParts.minute} onValueChange={(value) => setEndTimeParts(p => ({...p, minute: value}))}>
-              <SelectTrigger><SelectValue placeholder="Menit" /></SelectTrigger>
+              <SelectTrigger className="focus:animate-input-glow"><SelectValue placeholder="Menit" /></SelectTrigger>
               <SelectContent>{minutes.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
             </Select>
           </div>
@@ -189,41 +134,15 @@ const EditBookingForm = ({ booking, onSubmit, onCancel }: EditBookingFormProps) 
 
       <div className="space-y-2">
         <Label htmlFor="edit-description">Keterangan</Label>
-        <Textarea
-          id="edit-description"
-          value={formData.description}
-          onChange={(e) => handleInputChange("description", e.target.value)}
-          placeholder="Keterangan tambahan (opsional)"
-          rows={3}
-          className="focus:ring-government-green resize-none"
-        />
+        <Textarea id="edit-description" value={formData.description} onChange={(e) => setFormData(p => ({...p, description: e.target.value}))} placeholder="Keterangan tambahan (opsional)" rows={3} className="resize-none focus:animate-input-glow" />
       </div>
 
       <div className="flex justify-end space-x-2 pt-4">
-        <Button 
-          type="button" 
-          variant="outline"
-          onClick={onCancel}
-        >
-          <X size={16} className="mr-2" />
-          Batal
+        <Button type="button" variant="outline" onClick={onCancel}>
+          <X size={16} className="mr-2" />Batal
         </Button>
-        <Button 
-          type="submit"
-          disabled={isSubmitting}
-          className="bg-government-green hover:bg-government-green-dark"
-        >
-          {isSubmitting ? (
-            <div className="flex items-center space-x-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              <span>Memproses...</span>
-            </div>
-          ) : (
-            <>
-              <Save size={16} className="mr-2" />
-              Simpan Perubahan
-            </>
-          )}
+        <Button type="submit" disabled={isSubmitting} className="bg-government-green hover:bg-government-green-dark">
+          {isSubmitting ? "Memproses..." : <><Save size={16} className="mr-2" />Simpan Perubahan</>}
         </Button>
       </div>
     </form>
