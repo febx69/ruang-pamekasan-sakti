@@ -18,6 +18,9 @@
     --primary: 142 65% 45%;
     --primary-foreground: 0 0% 100%;
 
+    /* Definisikan warna primary-dark yang hilang */
+    --primary-dark: 142 65% 35%; 
+
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 215 28% 17%;
 
