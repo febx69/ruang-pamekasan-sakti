@@ -227,6 +227,10 @@ export const useSupabaseBookings = (user: User | null) => {
     });
   };
 
+  const getAllBookings = () => {
+    return bookings;
+  };
+
   const exportToExcel = async (period: 'month' | 'quarter' | 'year') => {
     const now = new Date();
     const cutoffDate = new Date();
