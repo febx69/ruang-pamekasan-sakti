@@ -19,43 +19,33 @@ interface BookingListProps {
   isLoading?: boolean;
 }
 
-const BookingList = ({ 
-  bookings, 
-  onDelete, 
-  onEdit, 
-  onBulkDelete, 
-  onExport, 
-  userRole, 
+const BookingList = ({
+  bookings,
+  onDelete,
+  onEdit,
+  onBulkDelete,
+  onExport,
+  userRole,
   title,
   isLoading = false
 }: BookingListProps) => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState<keyof BookingData>('date');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const filteredBookings = bookings
-    .filter(booking => 
+    .filter(booking =>
       booking.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.room.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (booking.description && booking.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
       booking.date.includes(searchTerm)
     )
     .sort((a, b) => {
-      const aVal = a[sortField];
-      const bVal = b[sortField];
-      const direction = sortDirection === 'asc' ? 1 : -1;
-      return aVal < bVal ? -direction : aVal > bVal ? direction : 0;
+      const dateComparison = b.date.localeCompare(a.date);
+      if (dateComparison !== 0) {
+        return dateComparison;
+      }
+      return a.startTime.localeCompare(b.startTime);
     });
-
-  const handleSort = (field: keyof BookingData) => {
-    if (sortField === field) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
 
   const handleDelete = async (id: string, name: string) => {
     if (!onDelete) return;
@@ -113,7 +103,7 @@ const BookingList = ({
   };
 
   const formatTime = (timeString: string) => {
-    return timeString;
+    return timeString.slice(0, 5);
   };
 
   const getRoomColor = (room: string) => {
@@ -149,14 +139,14 @@ const BookingList = ({
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="sm" className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground">
                     <Archive size={16} className="mr-2" />
-                    Hapus Data
+                    Hapus Data Lama
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Hapus Data Peminjaman</AlertDialogTitle>
+                    <AlertDialogTitle>Arsipkan Data Peminjaman</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Pilih periode data yang ingin dihapus:
+                      Ini akan menghapus data peminjaman yang sudah lewat. Pilih periode data yang ingin dihapus secara permanen:
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <div className="flex flex-col gap-2">
@@ -165,21 +155,21 @@ const BookingList = ({
                       onClick={() => handleBulkDelete('month')}
                       className="justify-start"
                     >
-                      Hapus Data Bulanan
+                      Hapus Data Lebih dari 1 Bulan
                     </Button>
                     <Button 
                       variant="destructive" 
                       onClick={() => handleBulkDelete('quarter')}
                       className="justify-start"
                     >
-                      Hapus Data Triwulanan
+                      Hapus Data Lebih dari 3 Bulan
                     </Button>
                     <Button 
                       variant="destructive" 
                       onClick={() => handleBulkDelete('year')}
                       className="justify-start"
                     >
-                      Hapus Data Tahunan
+                      Hapus Data Lebih dari 1 Tahun
                     </Button>
                   </div>
                   <AlertDialogFooter>
@@ -208,21 +198,21 @@ const BookingList = ({
                       onClick={() => handleExport('month')}
                       className="justify-start"
                     >
-                      Export Data Bulanan
+                      Export Data 1 Bulan Terakhir
                     </Button>
                     <Button 
                       variant="outline" 
                       onClick={() => handleExport('quarter')}
                       className="justify-start"
                     >
-                      Export Data Triwulanan
+                      Export Data 3 Bulan Terakhir
                     </Button>
                     <Button 
                       variant="outline" 
                       onClick={() => handleExport('year')}
                       className="justify-start"
                     >
-                      Export Data Tahunan
+                      Export Data 1 Tahun Terakhir
                     </Button>
                   </div>
                   <AlertDialogFooter>
@@ -260,14 +250,15 @@ const BookingList = ({
               <p>Tidak ada data peminjaman</p>
             </div>
           ) : (
-            filteredBookings.map((booking) => (
+            filteredBookings.map((booking, index) => (
               <div 
                 key={booking.id} 
-                className={`p-4 border rounded-lg transition-all duration-200 hover:shadow-md ${
+                className={`p-4 border rounded-lg transition-all duration-300 animate-enter-from-bottom opacity-0 hover:shadow-lg hover:border-government-green/50 hover:scale-[1.01] ${
                   isActiveBooking(booking) 
                     ? 'bg-government-green/5 border-government-green/30' 
                     : 'bg-card opacity-60'
                 }`}
+                 style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'forwards' }}
               >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                   <div className="flex-1 space-y-2">
