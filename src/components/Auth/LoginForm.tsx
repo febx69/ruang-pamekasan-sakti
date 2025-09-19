@@ -1,3 +1,4 @@
+// src/components/Auth/LoginForm.tsx
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +30,8 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
     const success = await onLogin(username, password);
     if (!success) {
       setError("Username atau password tidak valid");
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 400);
     }
     
     setIsLoading(false);
@@ -35,7 +39,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-elevated animate-enter-from-bottom border-none">
+      <Card className={`w-full max-w-md shadow-elevated animate-enter-from-bottom border-none ${isShaking ? 'animate-shake' : ''}`}>
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
             <img 
