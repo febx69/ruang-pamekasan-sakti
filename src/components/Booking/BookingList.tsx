@@ -1,3 +1,4 @@
+// src/components/Booking/BookingList.tsx
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Calendar, Clock, MapPin, Search, Trash2, Edit, Users, Download, Archive } from "lucide-react";
 import { BookingData } from "./BookingForm";
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface BookingListProps {
   bookings: BookingData[];
@@ -241,10 +243,20 @@ const BookingList = ({
 
         <div className="space-y-3">
           {isLoading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Memuat data...</p>
-            </div>
+             Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="p-4 border rounded-lg space-y-3">
+                  <div className="flex justify-between items-center">
+                    <Skeleton className="h-6 w-1/2" />
+                    <Skeleton className="h-5 w-1/4" />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-5 w-full" />
+                  </div>
+                  <Skeleton className="h-4 w-full" />
+                </div>
+              ))
           ) : filteredBookings.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Users size={48} className="mx-auto mb-4 opacity-50" />
