@@ -32,10 +32,10 @@ const Header = ({ user, onLogout }: HeaderProps) => {
               </h1>
               {/* Judul untuk Desktop (>=768px) */}
               <h1 className="hidden md:block text-xl font-bold tracking-tight">
-                Sistem Manajemen Peminjaman Ruangan
+                Sistem Peminjaman Ruangan
               </h1>
               <p className="hidden sm:block text-xs md:text-sm text-white/90">
-                Dinas Kesehatan Pamekasan
+                Dinas Kesehatan Kabupaten Pamekasan
               </p>
             </div>
           </div>
