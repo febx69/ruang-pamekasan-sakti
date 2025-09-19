@@ -66,7 +66,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Masukkan username"
                 required
-                className={`transition-all duration-200 focus-visible-ring ${error ? 'animate-input-error-flash border-destructive' : ''}`}
+                className="transition-all duration-200 focus-visible-ring"
               />
             </div>
             
@@ -79,7 +79,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Masukkan password"
                 required
-                className={`transition-all duration-200 focus-visible-ring ${error ? 'animate-input-error-flash border-destructive' : ''}`}
+                className="transition-all duration-200 focus-visible-ring"
               />
             </div>
 
