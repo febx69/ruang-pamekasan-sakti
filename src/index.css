@@ -1,3 +1,4 @@
+// src/index.css
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -85,21 +86,15 @@
   }
 }
 
-/* Custom focus ring for light theme inputs */
-/* Ini akan menghasilkan "lampu tipis remang-remang biru" */
+/* Menambahkan transisi halus ke elemen dengan kelas focus-visible-ring */
+.focus-visible-ring {
+  @apply transition-all duration-200;
+}
+
+/* Menerapkan efek glow pada saat hover DAN focus */
+.focus-visible-ring:hover,
 .focus-visible-ring:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px hsl(var(--ring) / 0.3); /* Ring yang lebih terlihat */
   border-color: hsl(var(--ring)); /* Border juga ikut berubah */
-}
-
-/* Override default focus-visible untuk input, select, textarea */
-input[type="text"].focus-visible-ring:focus-visible,
-input[type="password"].focus-visible-ring:focus-visible,
-input[type="date"].focus-visible-ring:focus-visible,
-textarea.focus-visible-ring:focus-visible,
-.select-trigger.focus-visible-ring:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.3);
-  border-color: hsl(var(--ring));
 }
