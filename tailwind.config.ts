@@ -97,10 +97,6 @@ export default {
             from: { opacity: "0" },
             to: { opacity: "1" },
         },
-        "input-error-flash": {
-          "0%, 100%": { borderColor: "hsl(var(--input))" },
-          "50%": { borderColor: "hsl(var(--destructive))" },
-        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -108,7 +104,6 @@ export default {
         "enter-from-bottom": "enter-from-bottom 0.4s ease-out",
         "background-pan": "background-pan 15s ease infinite",
         "fade-in": "fade-in 0.5s ease-out forwards",
-        "input-error-flash": "input-error-flash 0.5s ease-out",
       },
     },
   },
