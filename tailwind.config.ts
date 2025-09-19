@@ -97,11 +97,10 @@ export default {
             from: { opacity: "0" },
             to: { opacity: "1" },
         },
-        "shake": {
-            "0%, 100%": { transform: "translateX(0)" },
-            "10%, 30%, 50%, 70%, 90%": { transform: "translateX(-5px)" },
-            "20%, 40%, 60%, 80%": { transform: "translateX(5px)" },
-        },
+        "input-error-flash": {
+          "0%, 100%": { borderColor: "hsl(var(--input))" },
+          "50%": { borderColor: "hsl(var(--destructive))" },
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -109,7 +108,7 @@ export default {
         "enter-from-bottom": "enter-from-bottom 0.4s ease-out",
         "background-pan": "background-pan 15s ease infinite",
         "fade-in": "fade-in 0.5s ease-out forwards",
-        "shake": "shake 0.4s ease-in-out",
+        "input-error-flash": "input-error-flash 0.5s ease-out",
       },
     },
   },
