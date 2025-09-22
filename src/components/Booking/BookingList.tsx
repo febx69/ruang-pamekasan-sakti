@@ -1,5 +1,4 @@
 // src/components/Booking/BookingList.tsx
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +18,7 @@ interface BookingListProps {
   onDelete?: (id: string) => Promise<{ success: boolean; error?: string }>;
   onEdit?: (booking: BookingData) => void;
   onBulkDelete?: (period: PeriodOption) => Promise<{ success: boolean; error?: string }>;
-  onExport?: (period: PeriodOption) => Promise<void>;
+  onExport?: (period: PeriodOption) => void;
   userRole: 'admin' | 'user';
   title: string;
   isLoading?: boolean;
@@ -38,18 +37,15 @@ const BookingList = ({
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState<number | undefined>();
-  const [selectedQuarter, setSelectedQuarter] = useState<number | undefined>();
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  
+  // Pisahkan state untuk setiap dialog untuk menghindari konflik
+  const [deleteMonth, setDeleteMonth] = useState<number | undefined>();
+  const [deleteQuarter, setDeleteQuarter] = useState<number | undefined>();
+  const [exportMonth, setExportMonth] = useState<number | undefined>();
+  const [exportQuarter, setExportQuarter] = useState<number | undefined>();
 
   const years = Array.from(new Set(bookings.map(b => new Date(b.date).getFullYear()))).sort((a, b) => b - a);
-  const months = [
-    { value: 1, label: 'Januari' }, { value: 2, label: 'Februari' }, { value: 3, label: 'Maret' },
-    { value: 4, label: 'April' }, { value: 5, label: 'Mei' }, { value: 6, label: 'Juni' },
-    { value: 7, label: 'Juli' }, { value: 8, label: 'Agustus' }, { value: 9, label: 'September' },
-    { value: 10, label: 'Oktober' }, { value: 11, label: 'November' }, { value: 12, label: 'Desember' },
-  ];
+  const months = Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: new Date(0, i).toLocaleString('id-ID', { month: 'long' }) }));
   const quarters = [{ value: 1, label: 'Triwulan 1 (Jan-Mar)' }, { value: 2, label: 'Triwulan 2 (Apr-Jun)' }, { value: 3, label: 'Triwulan 3 (Jul-Sep)' }, { value: 4, label: 'Triwulan 4 (Okt-Des)' }];
 
   const filteredBookings = bookings
@@ -88,7 +84,7 @@ const BookingList = ({
   const handleBulkDelete = async () => {
     if (!onBulkDelete || !selectedYear) return;
 
-    const result = await onBulkDelete({ year: selectedYear, month: selectedMonth, quarter: selectedQuarter });
+    const result = await onBulkDelete({ year: selectedYear, month: deleteMonth, quarter: deleteQuarter });
     if (result.success) {
       toast({
         title: "Berhasil dihapus",
@@ -101,19 +97,25 @@ const BookingList = ({
         variant: "destructive"
       });
     }
-    setDeleteDialogOpen(false);
   };
   
-  const handleExport = async () => {
+  const handleExport = () => {
     if (!onExport || !selectedYear) return;
-    await onExport({ year: selectedYear, month: selectedMonth, quarter: selectedQuarter });
+    onExport({ year: selectedYear, month: exportMonth, quarter: exportQuarter });
     toast({
       title: "Berhasil diunduh",
       description: `Data peminjaman berhasil diunduh`,
     });
-    setExportDialogOpen(false);
   };
 
+  const handleCancel = () => {
+    // Reset state saat dialog ditutup
+    setDeleteMonth(undefined);
+    setDeleteQuarter(undefined);
+    setExportMonth(undefined);
+    setExportQuarter(undefined);
+  };
+  
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
       weekday: 'long',
@@ -156,7 +158,7 @@ const BookingList = ({
           
           {userRole === 'admin' && (
             <div className="flex flex-wrap gap-2">
-              <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+              <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="sm" className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground">
                     <Archive size={16} className="mr-2" />
@@ -175,38 +177,50 @@ const BookingList = ({
                       <Label htmlFor="year-select-delete" className="text-right">Tahun</Label>
                       <Select value={selectedYear?.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
                           <SelectTrigger id="year-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Tahun" /></SelectTrigger>
-                          <SelectContent position="item-aligned">{years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
+                          <SelectContent>{years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="month-select-delete" className="text-right">Bulan</Label>
-                       <Select value={selectedMonth?.toString() ?? ""} onValueChange={(v) => {setSelectedMonth(v ? parseInt(v) : undefined); setSelectedQuarter(undefined);}}>
-                          <SelectTrigger id="month-select-delete" className="col-span-3"><SelectValue placeholder="Semua bulan" /></SelectTrigger>
-                          <SelectContent position="item-aligned">
-                            <SelectItem value="">Semua bulan</SelectItem>
+                      <Label htmlFor="month-select-delete" className="text-right">Bulan (Opsional)</Label>
+                       <Select 
+                         value={deleteMonth?.toString() ?? ""} 
+                         onValueChange={(v) => {
+                           setDeleteMonth(v ? parseInt(v) : undefined); 
+                           if (v) setDeleteQuarter(undefined);
+                         }}
+                       >
+                          <SelectTrigger id="month-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Bulan" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Semua Bulan</SelectItem>
                             {months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}
                           </SelectContent>
                       </Select>
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="quarter-select-delete" className="text-right">Triwulan</Label>
-                      <Select value={selectedQuarter?.toString() ?? ""} onValueChange={(v) => {setSelectedQuarter(v ? parseInt(v) : undefined); setSelectedMonth(undefined);}}>
-                          <SelectTrigger id="quarter-select-delete" className="col-span-3"><SelectValue placeholder="Semua triwulan" /></SelectTrigger>
-                          <SelectContent position="item-aligned">
-                            <SelectItem value="">Semua triwulan</SelectItem>
+                      <Label htmlFor="quarter-select-delete" className="text-right">Triwulan (Opsional)</Label>
+                      <Select 
+                        value={deleteQuarter?.toString() ?? ""} 
+                        onValueChange={(v) => {
+                          setDeleteQuarter(v ? parseInt(v) : undefined); 
+                          if (v) setDeleteMonth(undefined);
+                        }}
+                      >
+                          <SelectTrigger id="quarter-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Triwulan" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">Semua Triwulan</SelectItem>
                             {quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}
                           </SelectContent>
                       </Select>
                     </div>
                   </div>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Batal</AlertDialogCancel>
-                    <Button onClick={handleBulkDelete} variant="destructive">Hapus</Button>
+                    <AlertDialogCancel onClick={handleCancel}>Batal</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleBulkDelete} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
 
-              <AlertDialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+              <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="sm" className="text-primary border-primary hover:bg-primary hover:text-primary-foreground">
                     <Download size={16} className="mr-2" />
@@ -225,33 +239,45 @@ const BookingList = ({
                         <Label htmlFor="year-select-export" className="text-right">Tahun</Label>
                         <Select value={selectedYear?.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
                             <SelectTrigger id="year-select-export" className="col-span-3"><SelectValue placeholder="Pilih Tahun" /></SelectTrigger>
-                            <SelectContent position="item-aligned">{years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
+                            <SelectContent>{years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="month-select-export" className="text-right">Bulan</Label>
-                        <Select value={selectedMonth?.toString() ?? ""} onValueChange={(v) => {setSelectedMonth(v ? parseInt(v) : undefined); setSelectedQuarter(undefined);}}>
-                            <SelectTrigger id="month-select-export" className="col-span-3"><SelectValue placeholder="Semua bulan" /></SelectTrigger>
-                            <SelectContent position="item-aligned">
-                              <SelectItem value="">Semua bulan</SelectItem>
+                        <Label htmlFor="month-select-export" className="text-right">Bulan (Opsional)</Label>
+                        <Select 
+                          value={exportMonth?.toString() ?? ""} 
+                          onValueChange={(v) => {
+                            setExportMonth(v ? parseInt(v) : undefined); 
+                            if (v) setExportQuarter(undefined);
+                          }}
+                        >
+                            <SelectTrigger id="month-select-export" className="col-span-3"><SelectValue placeholder="Pilih Bulan" /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="">Semua Bulan</SelectItem>
                               {months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}
                             </SelectContent>
                         </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="quarter-select-export" className="text-right">Triwulan</Label>
-                        <Select value={selectedQuarter?.toString() ?? ""} onValueChange={(v) => {setSelectedQuarter(v ? parseInt(v) : undefined); setSelectedMonth(undefined);}}>
-                            <SelectTrigger id="quarter-select-export" className="col-span-3"><SelectValue placeholder="Semua triwulan" /></SelectTrigger>
-                            <SelectContent position="item-aligned">
-                              <SelectItem value="">Semua triwulan</SelectItem>
+                        <Label htmlFor="quarter-select-export" className="text-right">Triwulan (Opsional)</Label>
+                        <Select 
+                          value={exportQuarter?.toString() ?? ""} 
+                          onValueChange={(v) => {
+                            setExportQuarter(v ? parseInt(v) : undefined); 
+                            if (v) setExportMonth(undefined);
+                          }}
+                        >
+                            <SelectTrigger id="quarter-select-export" className="col-span-3"><SelectValue placeholder="Pilih Triwulan" /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="">Semua Triwulan</SelectItem>
                               {quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}
                             </SelectContent>
                         </Select>
                     </div>
                   </div>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Batal</AlertDialogCancel>
-                    <Button onClick={handleExport}>Export</Button>
+                    <AlertDialogCancel onClick={handleCancel}>Batal</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleExport}>Export</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
