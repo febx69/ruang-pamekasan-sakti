@@ -19,7 +19,7 @@ interface BookingListProps {
   onDelete?: (id: string) => Promise<{ success: boolean; error?: string }>;
   onEdit?: (booking: BookingData) => void;
   onBulkDelete?: (period: PeriodOption) => Promise<{ success: boolean; error?: string }>;
-  onExport?: (period: PeriodOption) => void;
+  onExport?: (period: PeriodOption) => Promise<void>;
   userRole: 'admin' | 'user';
   title: string;
   isLoading?: boolean;
@@ -40,6 +40,8 @@ const BookingList = ({
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number | undefined>();
   const [selectedQuarter, setSelectedQuarter] = useState<number | undefined>();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
   const years = Array.from(new Set(bookings.map(b => new Date(b.date).getFullYear()))).sort((a, b) => b - a);
   const months = [
@@ -99,15 +101,17 @@ const BookingList = ({
         variant: "destructive"
       });
     }
+    setDeleteDialogOpen(false);
   };
   
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!onExport || !selectedYear) return;
-    onExport({ year: selectedYear, month: selectedMonth, quarter: selectedQuarter });
+    await onExport({ year: selectedYear, month: selectedMonth, quarter: selectedQuarter });
     toast({
       title: "Berhasil diunduh",
       description: `Data peminjaman berhasil diunduh`,
     });
+    setExportDialogOpen(false);
   };
 
   const formatDate = (dateString: string) => {
@@ -152,7 +156,7 @@ const BookingList = ({
           
           {userRole === 'admin' && (
             <div className="flex flex-wrap gap-2">
-              <AlertDialog>
+              <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="sm" className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground">
                     <Archive size={16} className="mr-2" />
@@ -197,12 +201,12 @@ const BookingList = ({
                   </div>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Batal</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleBulkDelete} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
+                    <Button onClick={handleBulkDelete} variant="destructive">Hapus</Button>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
 
-              <AlertDialog>
+              <AlertDialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="sm" className="text-primary border-primary hover:bg-primary hover:text-primary-foreground">
                     <Download size={16} className="mr-2" />
@@ -247,7 +251,7 @@ const BookingList = ({
                   </div>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Batal</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleExport}>Export</AlertDialogAction>
+                    <Button onClick={handleExport}>Export</Button>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
