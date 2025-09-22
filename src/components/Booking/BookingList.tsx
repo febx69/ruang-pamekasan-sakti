@@ -171,21 +171,21 @@ const BookingList = ({
                       <Label htmlFor="year-select-delete" className="text-right">Tahun</Label>
                       <Select value={selectedYear?.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
                           <SelectTrigger id="year-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Tahun" /></SelectTrigger>
-                          <SelectContent position="popper" side="bottom">{years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
+                          <SelectContent position="item-aligned">{years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="month-select-delete" className="text-right">Bulan (Opsional)</Label>
                        <Select value={selectedMonth?.toString()} onValueChange={(v) => {setSelectedMonth(v ? parseInt(v) : undefined); setSelectedQuarter(undefined);}}>
-                          <SelectTrigger id="month-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Bulan" /></SelectTrigger>
-                          <SelectContent position="popper" side="bottom">{months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
+                          <SelectTrigger id="month-select-delete" className="col-span-3"><SelectValue placeholder="Semua bulan" /></SelectTrigger>
+                          <SelectContent position="item-aligned">{months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="quarter-select-delete" className="text-right">Triwulan (Opsional)</Label>
                       <Select value={selectedQuarter?.toString()} onValueChange={(v) => {setSelectedQuarter(v ? parseInt(v) : undefined); setSelectedMonth(undefined);}}>
-                          <SelectTrigger id="quarter-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Triwulan" /></SelectTrigger>
-                          <SelectContent position="popper" side="bottom">{quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
+                          <SelectTrigger id="quarter-select-delete" className="col-span-3"><SelectValue placeholder="Semua triwulan" /></SelectTrigger>
+                          <SelectContent position="item-aligned">{quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                   </div>
@@ -215,21 +215,21 @@ const BookingList = ({
                         <Label htmlFor="year-select-export" className="text-right">Tahun</Label>
                         <Select value={selectedYear?.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
                             <SelectTrigger id="year-select-export" className="col-span-3"><SelectValue placeholder="Pilih Tahun" /></SelectTrigger>
-                            <SelectContent position="popper" side="bottom">{years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
+                            <SelectContent position="item-aligned">{years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="month-select-export" className="text-right">Bulan (Opsional)</Label>
                         <Select value={selectedMonth?.toString()} onValueChange={(v) => {setSelectedMonth(v ? parseInt(v) : undefined); setSelectedQuarter(undefined);}}>
-                            <SelectTrigger id="month-select-export" className="col-span-3"><SelectValue placeholder="Pilih Bulan" /></SelectTrigger>
-                            <SelectContent position="popper" side="bottom">{months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
+                            <SelectTrigger id="month-select-export" className="col-span-3"><SelectValue placeholder="Semua bulan" /></SelectTrigger>
+                            <SelectContent position="item-aligned">{months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="quarter-select-export" className="text-right">Triwulan (Opsional)</Label>
                         <Select value={selectedQuarter?.toString()} onValueChange={(v) => {setSelectedQuarter(v ? parseInt(v) : undefined); setSelectedMonth(undefined);}}>
-                            <SelectTrigger id="quarter-select-export" className="col-span-3"><SelectValue placeholder="Pilih Triwulan" /></SelectTrigger>
-                            <SelectContent position="popper" side="bottom">{quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
+                            <SelectTrigger id="quarter-select-export" className="col-span-3"><SelectValue placeholder="Semua triwulan" /></SelectTrigger>
+                            <SelectContent position="item-aligned">{quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
                   </div>
