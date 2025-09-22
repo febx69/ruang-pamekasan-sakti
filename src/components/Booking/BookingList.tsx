@@ -39,18 +39,47 @@ const BookingList = ({
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number | undefined>();
   const [selectedQuarter, setSelectedQuarter] = useState<number | undefined>();
+  const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'tomorrow'>('all');
 
   const years = Array.from(new Set(bookings.map(b => new Date(b.date).getFullYear()))).sort((a, b) => b - a);
   const months = Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: new Date(0, i).toLocaleString('id-ID', { month: 'long' }) }));
   const quarters = [{ value: 1, label: 'Triwulan 1 (Jan-Mar)' }, { value: 2, label: 'Triwulan 2 (Apr-Jun)' }, { value: 3, label: 'Triwulan 3 (Jul-Sep)' }, { value: 4, label: 'Triwulan 4 (Okt-Des)' }];
 
+  const getFormattedDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const todayString = getFormattedDate(new Date());
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowString = getFormattedDate(tomorrow);
+
   const filteredBookings = bookings
-    .filter(booking =>
-      booking.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.room.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (booking.description && booking.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      booking.date.includes(searchTerm)
-    )
+    .filter(booking => {
+      // Filter berdasarkan pencarian
+      const searchMatch =
+        booking.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        booking.room.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (booking.description && booking.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        booking.date.includes(searchTerm);
+
+      if (!searchMatch) return false;
+
+      // Filter tambahan berdasarkan tanggal untuk user biasa
+      if (userRole === 'user') {
+        if (dateFilter === 'today') {
+          return booking.date === todayString;
+        }
+        if (dateFilter === 'tomorrow') {
+          return booking.date === tomorrowString;
+        }
+      }
+      
+      return true;
+    })
     .sort((a, b) => {
       const dateComparison = b.date.localeCompare(a.date);
       if (dateComparison !== 0) {
@@ -170,18 +199,21 @@ const BookingList = ({
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="month-select-delete" className="text-right">Bulan (Opsional)</Label>
-                       <Select value={selectedMonth?.toString()} onValueChange={(v) => {setSelectedMonth(v ? parseInt(v) : undefined); if (v) setSelectedQuarter(undefined);}}>
+                       <Select value={selectedMonth?.toString() ?? ''} onValueChange={(v) => {setSelectedMonth(v ? parseInt(v) : undefined); if (v) setSelectedQuarter(undefined);}}>
                           <SelectTrigger id="month-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Bulan" /></SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="">Semua Bulan</SelectItem>
                             {months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}
                           </SelectContent>
                       </Select>
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="quarter-select-delete" className="text-right">Triwulan (Opsional)</Label>
-                      <Select value={selectedQuarter?.toString()} onValueChange={(v) => {setSelectedQuarter(v ? parseInt(v) : undefined); if (v) setSelectedMonth(undefined);}}>
+                      <Select value={selectedQuarter?.toString() ?? ''} onValueChange={(v) => {setSelectedQuarter(v ? parseInt(v) : undefined); if (v) setSelectedMonth(undefined);}}>
                           <SelectTrigger id="quarter-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Triwulan" /></SelectTrigger>
-                          <SelectContent>{quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
+                          <SelectContent>
+                            <SelectItem value="">Semua Triwulan</SelectItem>
+                            {quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                   </div>
@@ -216,16 +248,20 @@ const BookingList = ({
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="month-select-export" className="text-right">Bulan (Opsional)</Label>
-                        <Select value={selectedMonth?.toString()} onValueChange={(v) => {setSelectedMonth(v ? parseInt(v) : undefined); if(v) setSelectedQuarter(undefined);}}>
+                        <Select value={selectedMonth?.toString() ?? ''} onValueChange={(v) => {setSelectedMonth(v ? parseInt(v) : undefined); if(v) setSelectedQuarter(undefined);}}>
                             <SelectTrigger id="month-select-export" className="col-span-3"><SelectValue placeholder="Pilih Bulan" /></SelectTrigger>
-                            <SelectContent>{months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
+                            <SelectContent>
+                               <SelectItem value="">Semua Bulan</SelectItem>
+                              {months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="quarter-select-export" className="text-right">Triwulan (Opsional)</Label>
-                        <Select value={selectedQuarter?.toString()} onValueChange={(v) => {setSelectedQuarter(v ? parseInt(v) : undefined); if(v) setSelectedMonth(undefined);}}>
+                        <Select value={selectedQuarter?.toString() ?? ''} onValueChange={(v) => {setSelectedQuarter(v ? parseInt(v) : undefined); if(v) setSelectedMonth(undefined);}}>
                             <SelectTrigger id="quarter-select-export" className="col-span-3"><SelectValue placeholder="Pilih Triwulan" /></SelectTrigger>
-                            <SelectContent>{quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
+                            <SelectContent>
+                              <SelectItem value="">Semua Triwulan</SelectItem>
+                              {quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
                   </div>
@@ -241,8 +277,8 @@ const BookingList = ({
       </CardHeader>
       
       <CardContent className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <div className="relative flex-1">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="relative flex-1 w-full">
             <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Cari peminjaman..."
@@ -251,6 +287,13 @@ const BookingList = ({
               className="pl-9 focus:animate-input-glow"
             />
           </div>
+          {userRole === 'user' && (
+            <div className="flex items-center space-x-2">
+              <Button variant={dateFilter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setDateFilter('all')}>Semua</Button>
+              <Button variant={dateFilter === 'today' ? 'default' : 'outline'} size="sm" onClick={() => setDateFilter('today')}>Hari Ini</Button>
+              <Button variant={dateFilter === 'tomorrow' ? 'default' : 'outline'} size="sm" onClick={() => setDateFilter('tomorrow')}>Besok</Button>
+            </div>
+          )}
         </div>
 
         <div className="space-y-3">
@@ -272,7 +315,7 @@ const BookingList = ({
           ) : filteredBookings.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Users size={48} className="mx-auto mb-4 opacity-50" />
-              <p>Tidak ada data peminjaman</p>
+              <p>Tidak ada data peminjaman yang cocok</p>
             </div>
           ) : (
             filteredBookings.map((booking, index) => (
