@@ -64,6 +64,7 @@ export default {
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",
         "gradient-header": "var(--gradient-header)",
+        "main-bg": "url('@/assets/bg.png')",
       },
       boxShadow: {
         government: "var(--shadow-government)",
