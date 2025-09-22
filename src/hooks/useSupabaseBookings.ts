@@ -55,19 +55,45 @@ export const useSupabaseBookings = (user: User | null) => {
   
     fetchBookings();
   
-    // Set up real-time subscription
-    const channel = supabase.channel('realtime-bookings')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'bookings' },
-        (payload) => {
-          // Re-fetch bookings whenever a change occurs in the database
-          fetchBookings();
-        }
-      )
+    const handleChanges = (payload: any) => {
+      if (payload.eventType === 'INSERT') {
+        const newBooking: BookingData = {
+          id: payload.new.id,
+          date: payload.new.date,
+          name: payload.new.name,
+          room: payload.new.room,
+          startTime: payload.new.start_time,
+          endTime: payload.new.end_time,
+          description: payload.new.description || '',
+          createdAt: payload.new.created_at
+        };
+        setBookings(currentBookings => [...currentBookings, newBooking]);
+      } else if (payload.eventType === 'UPDATE') {
+        const updatedBooking: BookingData = {
+          id: payload.new.id,
+          date: payload.new.date,
+          name: payload.new.name,
+          room: payload.new.room,
+          startTime: payload.new.start_time,
+          endTime: payload.new.end_time,
+          description: payload.new.description || '',
+          createdAt: payload.new.created_at
+        };
+        setBookings(currentBookings =>
+          currentBookings.map(b => (b.id === updatedBooking.id ? updatedBooking : b))
+        );
+      } else if (payload.eventType === 'DELETE') {
+        setBookings(currentBookings =>
+          currentBookings.filter(b => b.id !== payload.old.id)
+        );
+      }
+    };
+  
+    const channel = supabase
+      .channel('realtime-bookings')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, handleChanges)
       .subscribe();
   
-    // Cleanup function to remove the subscription on component unmount or user logout
     return () => {
       supabase.removeChannel(channel);
     };
@@ -89,7 +115,6 @@ export const useSupabaseBookings = (user: User | null) => {
       const existingStart = booking.startTime;
       const existingEnd = booking.endTime;
 
-      // Check if time ranges overlap
       return (
         (newStart >= existingStart && newStart < existingEnd) ||
         (newEnd > existingStart && newEnd <= existingEnd) ||
@@ -101,7 +126,6 @@ export const useSupabaseBookings = (user: User | null) => {
   const addBooking = async (bookingData: Omit<BookingData, 'id' | 'createdAt'>): Promise<{ success: boolean; error?: string }> => {
     if (!user) return { success: false, error: 'User not authenticated' };
 
-    // Check for time conflicts
     if (checkTimeConflict(bookingData.date, bookingData.room, bookingData.startTime, bookingData.endTime)) {
       return { 
         success: false, 
@@ -129,7 +153,6 @@ export const useSupabaseBookings = (user: User | null) => {
         return { success: false, error: 'Gagal menambah peminjaman' };
       }
 
-      // No need to call fetchBookings here, realtime will handle it
       return { success: true };
     } catch (error) {
       console.error('Error adding booking:', error);
@@ -140,7 +163,6 @@ export const useSupabaseBookings = (user: User | null) => {
   const updateBooking = async (id: string, updatedData: Partial<BookingData>): Promise<{ success: boolean; error?: string }> => {
     if (!user) return { success: false, error: 'User not authenticated' };
 
-    // Check for time conflicts if time or date is being updated
     if (updatedData.date || updatedData.startTime || updatedData.endTime || updatedData.room) {
       const existingBooking = bookings.find(b => b.id === id);
       if (!existingBooking) return { success: false, error: 'Peminjaman tidak ditemukan' };
@@ -177,7 +199,6 @@ export const useSupabaseBookings = (user: User | null) => {
         return { success: false, error: 'Gagal memperbarui peminjaman' };
       }
 
-      // No need to call fetchBookings here, realtime will handle it
       return { success: true };
     } catch (error) {
       console.error('Error updating booking:', error);
@@ -199,7 +220,6 @@ export const useSupabaseBookings = (user: User | null) => {
         return { success: false, error: 'Gagal menghapus peminjaman' };
       }
 
-      // No need to call fetchBookings here, realtime will handle it
       return { success: true };
     } catch (error) {
       console.error('Error deleting booking:', error);
@@ -215,20 +235,17 @@ export const useSupabaseBookings = (user: User | null) => {
 
       if (period.year) {
         if (period.month) {
-          // Hapus berdasarkan bulan dan tahun
           const startDate = new Date(period.year, period.month - 1, 1);
           const endDate = new Date(period.year, period.month, 0);
           query = query.gte('date', startDate.toISOString().split('T')[0]);
           query = query.lte('date', endDate.toISOString().split('T')[0]);
         } else if (period.quarter) {
-          // Hapus berdasarkan triwulan dan tahun
           const startMonth = (period.quarter - 1) * 3;
           const startDate = new Date(period.year, startMonth, 1);
           const endDate = new Date(period.year, startMonth + 3, 0);
           query = query.gte('date', startDate.toISOString().split('T')[0]);
           query = query.lte('date', endDate.toISOString().split('T')[0]);
         } else {
-          // Hapus berdasarkan tahun saja
           query = query.gte('date', `${period.year}-01-01`);
           query = query.lte('date', `${period.year}-12-31`);
         }
@@ -243,7 +260,6 @@ export const useSupabaseBookings = (user: User | null) => {
         return { success: false, error: 'Gagal menghapus data massal' };
       }
   
-      // No need to call fetchBookings here, realtime will handle it
       return { success: true };
     } catch (error) {
       console.error('Error bulk deleting:', error);
@@ -252,12 +268,10 @@ export const useSupabaseBookings = (user: User | null) => {
   };
 
   const getActiveBookings = () => {
-    const now = new Date(); // Waktu saat ini
+    const now = new Date();
     
     return bookings.filter(booking => {
-      // Menggabungkan tanggal dan jam selesai menjadi satu objek Date
       const endDateTime = new Date(`${booking.date}T${booking.endTime}`);
-      // Peminjaman dianggap aktif jika waktu selesainya masih di masa depan
       return endDateTime > now;
     });
   };
