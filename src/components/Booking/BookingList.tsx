@@ -37,12 +37,8 @@ const BookingList = ({
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-
-  // State terpisah untuk setiap dialog
-  const [deleteMonth, setDeleteMonth] = useState<number | undefined>();
-  const [deleteQuarter, setDeleteQuarter] = useState<number | undefined>();
-  const [exportMonth, setExportMonth] = useState<number | undefined>();
-  const [exportQuarter, setExportQuarter] = useState<number | undefined>();
+  const [selectedMonth, setSelectedMonth] = useState<number | undefined>();
+  const [selectedQuarter, setSelectedQuarter] = useState<number | undefined>();
 
   const years = Array.from(new Set(bookings.map(b => new Date(b.date).getFullYear()))).sort((a, b) => b - a);
   const months = Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: new Date(0, i).toLocaleString('id-ID', { month: 'long' }) }));
@@ -56,6 +52,7 @@ const BookingList = ({
       booking.date.includes(searchTerm)
     )
     .sort((a, b) => {
+      // Sort by date descending, then start time ascending
       const dateComparison = b.date.localeCompare(a.date);
       if (dateComparison !== 0) {
         return dateComparison;
@@ -84,7 +81,7 @@ const BookingList = ({
   const handleBulkDelete = async () => {
     if (!onBulkDelete || !selectedYear) return;
 
-    const result = await onBulkDelete({ year: selectedYear, month: deleteMonth, quarter: deleteQuarter });
+    const result = await onBulkDelete({ year: selectedYear, month: selectedMonth, quarter: selectedQuarter });
     if (result.success) {
       toast({
         title: "Berhasil dihapus",
@@ -101,19 +98,11 @@ const BookingList = ({
   
   const handleExport = () => {
     if (!onExport || !selectedYear) return;
-    onExport({ year: selectedYear, month: exportMonth, quarter: exportQuarter });
+    onExport({ year: selectedYear, month: selectedMonth, quarter: selectedQuarter });
     toast({
       title: "Berhasil diunduh",
       description: `Data peminjaman berhasil diunduh`,
     });
-  };
-
-  const handleCancel = () => {
-    // Reset state pilihan saat dialog ditutup/dibatalkan
-    setDeleteMonth(undefined);
-    setDeleteQuarter(undefined);
-    setExportMonth(undefined);
-    setExportQuarter(undefined);
   };
 
   const formatDate = (dateString: string) => {
@@ -158,7 +147,7 @@ const BookingList = ({
           
           {userRole === 'admin' && (
             <div className="flex flex-wrap gap-2">
-              <AlertDialog onOpenChange={(open) => !open && handleCancel()}>
+              <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="sm" className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground">
                     <Archive size={16} className="mr-2" />
@@ -182,34 +171,16 @@ const BookingList = ({
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="month-select-delete" className="text-right">Bulan (Opsional)</Label>
-                       <Select 
-                         value={deleteMonth?.toString() ?? ""} 
-                         onValueChange={(v) => {
-                           setDeleteMonth(v ? parseInt(v) : undefined); 
-                           if (v) setDeleteQuarter(undefined);
-                         }}
-                       >
-                          <SelectTrigger id="month-select-delete" className="col-span-3"><SelectValue placeholder="Semua Bulan" /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="">Semua Bulan</SelectItem>
-                            {months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}
-                          </SelectContent>
+                       <Select value={selectedMonth?.toString()} onValueChange={(v) => {setSelectedMonth(parseInt(v)); setSelectedQuarter(undefined);}}>
+                          <SelectTrigger id="month-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Bulan" /></SelectTrigger>
+                          <SelectContent>{months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="quarter-select-delete" className="text-right">Triwulan (Opsional)</Label>
-                      <Select 
-                        value={deleteQuarter?.toString() ?? ""} 
-                        onValueChange={(v) => {
-                          setDeleteQuarter(v ? parseInt(v) : undefined); 
-                          if (v) setDeleteMonth(undefined);
-                        }}
-                      >
-                          <SelectTrigger id="quarter-select-delete" className="col-span-3"><SelectValue placeholder="Semua Triwulan" /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="">Semua Triwulan</SelectItem>
-                            {quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}
-                          </SelectContent>
+                      <Select value={selectedQuarter?.toString()} onValueChange={(v) => {setSelectedQuarter(parseInt(v)); setSelectedMonth(undefined);}}>
+                          <SelectTrigger id="quarter-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Triwulan" /></SelectTrigger>
+                          <SelectContent>{quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                   </div>
@@ -220,7 +191,7 @@ const BookingList = ({
                 </AlertDialogContent>
               </AlertDialog>
 
-              <AlertDialog onOpenChange={(open) => !open && handleCancel()}>
+              <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="sm" className="text-primary border-primary hover:bg-primary hover:text-primary-foreground">
                     <Download size={16} className="mr-2" />
@@ -244,34 +215,16 @@ const BookingList = ({
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="month-select-export" className="text-right">Bulan (Opsional)</Label>
-                        <Select 
-                          value={exportMonth?.toString() ?? ""} 
-                          onValueChange={(v) => {
-                            setExportMonth(v ? parseInt(v) : undefined); 
-                            if (v) setExportQuarter(undefined);
-                          }}
-                        >
-                            <SelectTrigger id="month-select-export" className="col-span-3"><SelectValue placeholder="Semua Bulan" /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="">Semua Bulan</SelectItem>
-                              {months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}
-                            </SelectContent>
+                        <Select value={selectedMonth?.toString()} onValueChange={(v) => {setSelectedMonth(parseInt(v)); setSelectedQuarter(undefined);}}>
+                            <SelectTrigger id="month-select-export" className="col-span-3"><SelectValue placeholder="Pilih Bulan" /></SelectTrigger>
+                            <SelectContent>{months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="quarter-select-export" className="text-right">Triwulan (Opsional)</Label>
-                        <Select 
-                          value={exportQuarter?.toString() ?? ""} 
-                          onValueChange={(v) => {
-                            setExportQuarter(v ? parseInt(v) : undefined); 
-                            if (v) setExportMonth(undefined);
-                          }}
-                        >
-                            <SelectTrigger id="quarter-select-export" className="col-span-3"><SelectValue placeholder="Semua Triwulan" /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="">Semua Triwulan</SelectItem>
-                              {quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}
-                            </SelectContent>
+                        <Select value={selectedQuarter?.toString()} onValueChange={(v) => {setSelectedQuarter(parseInt(v)); setSelectedMonth(undefined);}}>
+                            <SelectTrigger id="quarter-select-export" className="col-span-3"><SelectValue placeholder="Pilih Triwulan" /></SelectTrigger>
+                            <SelectContent>{quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
                   </div>
