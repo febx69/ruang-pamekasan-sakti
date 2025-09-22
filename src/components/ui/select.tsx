@@ -77,8 +77,6 @@ const SelectContent = React.forwardRef<
       {...props}
     >
       <SelectScrollUpButton />
-      {/* --- PERBAIKAN DI SINI --- */}
-      {/* Menggunakan variabel CSS dari Radix untuk memastikan konten tidak keluar dari layar */}
       <SelectPrimitive.Viewport
         className={cn(
           "p-1",
@@ -88,7 +86,6 @@ const SelectContent = React.forwardRef<
       >
         {children}
       </SelectPrimitive.Viewport>
-      {/* --- AKHIR DARI PERBAIKAN --- */}
       <SelectScrollDownButton />
     </SelectPrimitive.Content>
   </SelectPrimitive.Portal>
