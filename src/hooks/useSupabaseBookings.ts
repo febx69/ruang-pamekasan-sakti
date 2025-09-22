@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { BookingData } from "@/components/Booking/BookingForm";
 import { User } from "./useSupabaseAuth";
@@ -13,7 +13,7 @@ export const useSupabaseBookings = (user: User | null) => {
   const [bookings, setBookings] = useState<BookingData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     if (!user) return;
     
     setIsLoading(true);
@@ -45,7 +45,7 @@ export const useSupabaseBookings = (user: User | null) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (!user) {
@@ -55,49 +55,22 @@ export const useSupabaseBookings = (user: User | null) => {
   
     fetchBookings();
   
-    const handleChanges = (payload: any) => {
-      if (payload.eventType === 'INSERT') {
-        const newBooking: BookingData = {
-          id: payload.new.id,
-          date: payload.new.date,
-          name: payload.new.name,
-          room: payload.new.room,
-          startTime: payload.new.start_time,
-          endTime: payload.new.end_time,
-          description: payload.new.description || '',
-          createdAt: payload.new.created_at
-        };
-        setBookings(currentBookings => [...currentBookings, newBooking]);
-      } else if (payload.eventType === 'UPDATE') {
-        const updatedBooking: BookingData = {
-          id: payload.new.id,
-          date: payload.new.date,
-          name: payload.new.name,
-          room: payload.new.room,
-          startTime: payload.new.start_time,
-          endTime: payload.new.end_time,
-          description: payload.new.description || '',
-          createdAt: payload.new.created_at
-        };
-        setBookings(currentBookings =>
-          currentBookings.map(b => (b.id === updatedBooking.id ? updatedBooking : b))
-        );
-      } else if (payload.eventType === 'DELETE') {
-        setBookings(currentBookings =>
-          currentBookings.filter(b => b.id !== payload.old.id)
-        );
-      }
-    };
-  
     const channel = supabase
       .channel('realtime-bookings')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, handleChanges)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bookings' },
+        () => {
+          // Re-fetch bookings whenever a change occurs in the database
+          fetchBookings();
+        }
+      )
       .subscribe();
   
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, fetchBookings]);
 
   const checkTimeConflict = (
     date: string,
@@ -134,7 +107,7 @@ export const useSupabaseBookings = (user: User | null) => {
     }
 
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('bookings')
         .insert({
           date: bookingData.date,
@@ -144,15 +117,14 @@ export const useSupabaseBookings = (user: User | null) => {
           end_time: bookingData.endTime,
           description: bookingData.description,
           user_id: user.id
-        })
-        .select()
-        .single();
+        });
 
       if (error) {
         console.error('Error adding booking:', error);
         return { success: false, error: 'Gagal menambah peminjaman' };
       }
 
+      await fetchBookings();
       return { success: true };
     } catch (error) {
       console.error('Error adding booking:', error);
@@ -198,7 +170,8 @@ export const useSupabaseBookings = (user: User | null) => {
         console.error('Error updating booking:', error);
         return { success: false, error: 'Gagal memperbarui peminjaman' };
       }
-
+      
+      await fetchBookings();
       return { success: true };
     } catch (error) {
       console.error('Error updating booking:', error);
@@ -220,6 +193,7 @@ export const useSupabaseBookings = (user: User | null) => {
         return { success: false, error: 'Gagal menghapus peminjaman' };
       }
 
+      await fetchBookings();
       return { success: true };
     } catch (error) {
       console.error('Error deleting booking:', error);
@@ -259,7 +233,8 @@ export const useSupabaseBookings = (user: User | null) => {
         console.error('Error bulk deleting:', error);
         return { success: false, error: 'Gagal menghapus data massal' };
       }
-  
+      
+      await fetchBookings();
       return { success: true };
     } catch (error) {
       console.error('Error bulk deleting:', error);
