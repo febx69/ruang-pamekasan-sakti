@@ -64,6 +64,7 @@ export default {
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",
         "gradient-header": "var(--gradient-header)",
+        "subtle-pattern": "url('@/assets/subtle-pattern.svg')",
       },
       boxShadow: {
         government: "var(--shadow-government)",
