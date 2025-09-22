@@ -48,7 +48,29 @@ export const useSupabaseBookings = (user: User | null) => {
   };
 
   useEffect(() => {
+    if (!user) {
+      setBookings([]);
+      return;
+    }
+  
     fetchBookings();
+  
+    // Set up real-time subscription
+    const channel = supabase.channel('realtime-bookings')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bookings' },
+        (payload) => {
+          // Re-fetch bookings whenever a change occurs in the database
+          fetchBookings();
+        }
+      )
+      .subscribe();
+  
+    // Cleanup function to remove the subscription on component unmount or user logout
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const checkTimeConflict = (
@@ -107,7 +129,7 @@ export const useSupabaseBookings = (user: User | null) => {
         return { success: false, error: 'Gagal menambah peminjaman' };
       }
 
-      await fetchBookings();
+      // No need to call fetchBookings here, realtime will handle it
       return { success: true };
     } catch (error) {
       console.error('Error adding booking:', error);
@@ -155,7 +177,7 @@ export const useSupabaseBookings = (user: User | null) => {
         return { success: false, error: 'Gagal memperbarui peminjaman' };
       }
 
-      await fetchBookings();
+      // No need to call fetchBookings here, realtime will handle it
       return { success: true };
     } catch (error) {
       console.error('Error updating booking:', error);
@@ -177,7 +199,7 @@ export const useSupabaseBookings = (user: User | null) => {
         return { success: false, error: 'Gagal menghapus peminjaman' };
       }
 
-      await fetchBookings();
+      // No need to call fetchBookings here, realtime will handle it
       return { success: true };
     } catch (error) {
       console.error('Error deleting booking:', error);
@@ -221,7 +243,7 @@ export const useSupabaseBookings = (user: User | null) => {
         return { success: false, error: 'Gagal menghapus data massal' };
       }
   
-      await fetchBookings();
+      // No need to call fetchBookings here, realtime will handle it
       return { success: true };
     } catch (error) {
       console.error('Error bulk deleting:', error);
