@@ -3,6 +3,12 @@ import { supabase } from "@/lib/supabase";
 import { BookingData } from "@/components/Booking/BookingForm";
 import { User } from "./useSupabaseAuth";
 
+export type PeriodOption = {
+  year?: number;
+  month?: number;
+  quarter?: number;
+};
+
 export const useSupabaseBookings = (user: User | null) => {
   const [bookings, setBookings] = useState<BookingData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -179,35 +185,42 @@ export const useSupabaseBookings = (user: User | null) => {
     }
   };
 
-  const bulkDeleteByPeriod = async (period: 'month' | 'quarter' | 'year'): Promise<{ success: boolean; error?: string }> => {
+  const bulkDeleteByPeriod = async (period: PeriodOption): Promise<{ success: boolean; error?: string }> => {
     if (!user || user.role !== 'admin') return { success: false, error: 'Unauthorized' };
 
     try {
-      const now = new Date();
-      const cutoffDate = new Date();
-      
-      switch (period) {
-        case 'month':
-          cutoffDate.setMonth(now.getMonth() - 1);
-          break;
-        case 'quarter':
-          cutoffDate.setMonth(now.getMonth() - 3);
-          break;
-        case 'year':
-          cutoffDate.setFullYear(now.getFullYear() - 1);
-          break;
+      let query = supabase.from('bookings').delete();
+
+      if (period.year) {
+        if (period.month) {
+          // Hapus berdasarkan bulan dan tahun
+          const startDate = new Date(period.year, period.month - 1, 1);
+          const endDate = new Date(period.year, period.month, 0);
+          query = query.gte('date', startDate.toISOString().split('T')[0]);
+          query = query.lte('date', endDate.toISOString().split('T')[0]);
+        } else if (period.quarter) {
+          // Hapus berdasarkan triwulan dan tahun
+          const startMonth = (period.quarter - 1) * 3;
+          const startDate = new Date(period.year, startMonth, 1);
+          const endDate = new Date(period.year, startMonth + 3, 0);
+          query = query.gte('date', startDate.toISOString().split('T')[0]);
+          query = query.lte('date', endDate.toISOString().split('T')[0]);
+        } else {
+          // Hapus berdasarkan tahun saja
+          query = query.gte('date', `${period.year}-01-01`);
+          query = query.lte('date', `${period.year}-12-31`);
+        }
+      } else {
+          return { success: false, error: 'Tahun harus dipilih' };
       }
-
-      const { error } = await supabase
-        .from('bookings')
-        .delete()
-        .lt('date', cutoffDate.toISOString().split('T')[0]);
-
+  
+      const { error } = await query;
+  
       if (error) {
         console.error('Error bulk deleting:', error);
         return { success: false, error: 'Gagal menghapus data massal' };
       }
-
+  
       await fetchBookings();
       return { success: true };
     } catch (error) {
@@ -231,28 +244,30 @@ export const useSupabaseBookings = (user: User | null) => {
     return bookings;
   };
 
-  const exportToExcel = async (period: 'month' | 'quarter' | 'year') => {
-    const now = new Date();
-    const cutoffDate = new Date();
-    
-    switch (period) {
-      case 'month':
-        cutoffDate.setMonth(now.getMonth() - 1);
-        break;
-      case 'quarter':
-        cutoffDate.setMonth(now.getMonth() - 3);
-        break;
-      case 'year':
-        cutoffDate.setFullYear(now.getFullYear() - 1);
-        break;
+  const exportToExcel = async (period: PeriodOption) => {
+    let filteredBookings = bookings;
+
+    if (period.year) {
+        filteredBookings = filteredBookings.filter(booking => {
+            const bookingYear = new Date(booking.date).getFullYear();
+            return bookingYear === period.year;
+        });
+
+        if (period.month) {
+            filteredBookings = filteredBookings.filter(booking => {
+                const bookingMonth = new Date(booking.date).getMonth() + 1;
+                return bookingMonth === period.month;
+            });
+        } else if (period.quarter) {
+            const startMonth = (period.quarter - 1) * 3 + 1;
+            const endMonth = startMonth + 2;
+            filteredBookings = filteredBookings.filter(booking => {
+                const bookingMonth = new Date(booking.date).getMonth() + 1;
+                return bookingMonth >= startMonth && bookingMonth <= endMonth;
+            });
+        }
     }
     
-    const filteredBookings = bookings.filter(booking => {
-      const bookingDate = new Date(booking.date);
-      return bookingDate >= cutoffDate;
-    });
-
-    // Simple CSV export
     const csvContent = [
       ['Tanggal', 'Nama Peminjam', 'Ruangan', 'Waktu Mulai', 'Waktu Selesai', 'Keterangan'],
       ...filteredBookings.map(booking => [
@@ -265,11 +280,11 @@ export const useSupabaseBookings = (user: User | null) => {
       ])
     ].map(row => row.join(',')).join('\n');
     
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.setAttribute('href', url);
-    a.setAttribute('download', `peminjaman-ruangan-${period}-${now.toISOString().split('T')[0]}.csv`);
+    a.setAttribute('download', `peminjaman-ruangan.csv`);
     a.click();
   };
 
