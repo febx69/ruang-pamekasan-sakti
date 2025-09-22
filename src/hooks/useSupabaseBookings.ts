@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import { BookingData } from "@/components/Booking/BookingForm";
 import { User } from "./useSupabaseAuth";
+import { toast } from "@/components/ui/use-toast";
 
 export type PeriodOption = {
   year?: number;
@@ -53,20 +54,61 @@ export const useSupabaseBookings = (user: User | null) => {
       return;
     }
   
+    // Initial fetch
     fetchBookings();
   
+    // Set up real-time subscription
     const channel = supabase
       .channel('realtime-bookings')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'bookings' },
-        () => {
-          // Re-fetch bookings whenever a change occurs in the database
-          fetchBookings();
+        (payload) => {
+          console.log('Perubahan terdeteksi!', payload);
+          
+          const formatBooking = (record: any): BookingData => ({
+            id: record.id,
+            date: record.date,
+            name: record.name,
+            room: record.room,
+            startTime: record.start_time,
+            endTime: record.end_time,
+            description: record.description || '',
+            createdAt: record.created_at
+          });
+
+          setBookings(currentBookings => {
+            if (payload.eventType === 'INSERT') {
+              toast({
+                title: "Jadwal Baru Ditambahkan",
+                description: `Peminjaman untuk ${payload.new.name} telah ditambahkan.`,
+              });
+              return [...currentBookings, formatBooking(payload.new)].sort((a, b) => b.date.localeCompare(a.date) || a.startTime.localeCompare(b.startTime));
+            }
+            if (payload.eventType === 'UPDATE') {
+               toast({
+                title: "Jadwal Diperbarui",
+                description: `Peminjaman untuk ${payload.new.name} telah diubah.`,
+              });
+              return currentBookings.map(booking =>
+                booking.id === payload.new.id ? formatBooking(payload.new) : booking
+              );
+            }
+            if (payload.eventType === 'DELETE') {
+              toast({
+                title: "Jadwal Dihapus",
+                description: `Satu jadwal peminjaman telah dihapus.`,
+                variant: "destructive"
+              });
+              return currentBookings.filter(booking => booking.id !== payload.old.id);
+            }
+            return currentBookings;
+          });
         }
       )
       .subscribe();
   
+    // Cleanup subscription on component unmount
     return () => {
       supabase.removeChannel(channel);
     };
@@ -123,8 +165,8 @@ export const useSupabaseBookings = (user: User | null) => {
         console.error('Error adding booking:', error);
         return { success: false, error: 'Gagal menambah peminjaman' };
       }
-
-      await fetchBookings();
+      
+      // No need to fetch here, real-time will handle it
       return { success: true };
     } catch (error) {
       console.error('Error adding booking:', error);
@@ -171,7 +213,7 @@ export const useSupabaseBookings = (user: User | null) => {
         return { success: false, error: 'Gagal memperbarui peminjaman' };
       }
       
-      await fetchBookings();
+      // No need to fetch here, real-time will handle it
       return { success: true };
     } catch (error) {
       console.error('Error updating booking:', error);
@@ -193,7 +235,7 @@ export const useSupabaseBookings = (user: User | null) => {
         return { success: false, error: 'Gagal menghapus peminjaman' };
       }
 
-      await fetchBookings();
+      // No need to fetch here, real-time will handle it
       return { success: true };
     } catch (error) {
       console.error('Error deleting booking:', error);
