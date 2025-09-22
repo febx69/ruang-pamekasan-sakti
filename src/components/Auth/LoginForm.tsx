@@ -35,7 +35,7 @@ const LoginForm = ({ onLogin }: LoginFormProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-main-bg bg-cover bg-center bg-fixed flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-elevated animate-enter-from-bottom border-none">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
