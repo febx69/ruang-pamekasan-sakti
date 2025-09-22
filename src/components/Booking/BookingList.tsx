@@ -1,4 +1,5 @@
 // src/components/Booking/BookingList.tsx
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +42,12 @@ const BookingList = ({
   const [selectedQuarter, setSelectedQuarter] = useState<number | undefined>();
 
   const years = Array.from(new Set(bookings.map(b => new Date(b.date).getFullYear()))).sort((a, b) => b - a);
-  const months = Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: new Date(0, i).toLocaleString('id-ID', { month: 'long' }) }));
+  const months = [
+    { value: 1, label: 'Januari' }, { value: 2, label: 'Februari' }, { value: 3, label: 'Maret' },
+    { value: 4, label: 'April' }, { value: 5, label: 'Mei' }, { value: 6, label: 'Juni' },
+    { value: 7, label: 'Juli' }, { value: 8, label: 'Agustus' }, { value: 9, label: 'September' },
+    { value: 10, label: 'Oktober' }, { value: 11, label: 'November' }, { value: 12, label: 'Desember' },
+  ];
   const quarters = [{ value: 1, label: 'Triwulan 1 (Jan-Mar)' }, { value: 2, label: 'Triwulan 2 (Apr-Jun)' }, { value: 3, label: 'Triwulan 3 (Jul-Sep)' }, { value: 4, label: 'Triwulan 4 (Okt-Des)' }];
 
   const filteredBookings = bookings
@@ -52,7 +58,6 @@ const BookingList = ({
       booking.date.includes(searchTerm)
     )
     .sort((a, b) => {
-      // Sort by date descending, then start time ascending
       const dateComparison = b.date.localeCompare(a.date);
       if (dateComparison !== 0) {
         return dateComparison;
@@ -166,21 +171,21 @@ const BookingList = ({
                       <Label htmlFor="year-select-delete" className="text-right">Tahun</Label>
                       <Select value={selectedYear?.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
                           <SelectTrigger id="year-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Tahun" /></SelectTrigger>
-                          <SelectContent>{years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
+                          <SelectContent position="popper" side="bottom">{years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="month-select-delete" className="text-right">Bulan (Opsional)</Label>
-                       <Select value={selectedMonth?.toString()} onValueChange={(v) => {setSelectedMonth(parseInt(v)); setSelectedQuarter(undefined);}}>
+                       <Select value={selectedMonth?.toString()} onValueChange={(v) => {setSelectedMonth(v ? parseInt(v) : undefined); setSelectedQuarter(undefined);}}>
                           <SelectTrigger id="month-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Bulan" /></SelectTrigger>
-                          <SelectContent>{months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
+                          <SelectContent position="popper" side="bottom">{months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="quarter-select-delete" className="text-right">Triwulan (Opsional)</Label>
-                      <Select value={selectedQuarter?.toString()} onValueChange={(v) => {setSelectedQuarter(parseInt(v)); setSelectedMonth(undefined);}}>
+                      <Select value={selectedQuarter?.toString()} onValueChange={(v) => {setSelectedQuarter(v ? parseInt(v) : undefined); setSelectedMonth(undefined);}}>
                           <SelectTrigger id="quarter-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Triwulan" /></SelectTrigger>
-                          <SelectContent>{quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
+                          <SelectContent position="popper" side="bottom">{quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
                       </Select>
                     </div>
                   </div>
@@ -210,21 +215,21 @@ const BookingList = ({
                         <Label htmlFor="year-select-export" className="text-right">Tahun</Label>
                         <Select value={selectedYear?.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
                             <SelectTrigger id="year-select-export" className="col-span-3"><SelectValue placeholder="Pilih Tahun" /></SelectTrigger>
-                            <SelectContent>{years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
+                            <SelectContent position="popper" side="bottom">{years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="month-select-export" className="text-right">Bulan (Opsional)</Label>
-                        <Select value={selectedMonth?.toString()} onValueChange={(v) => {setSelectedMonth(parseInt(v)); setSelectedQuarter(undefined);}}>
+                        <Select value={selectedMonth?.toString()} onValueChange={(v) => {setSelectedMonth(v ? parseInt(v) : undefined); setSelectedQuarter(undefined);}}>
                             <SelectTrigger id="month-select-export" className="col-span-3"><SelectValue placeholder="Pilih Bulan" /></SelectTrigger>
-                            <SelectContent>{months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
+                            <SelectContent position="popper" side="bottom">{months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="quarter-select-export" className="text-right">Triwulan (Opsional)</Label>
-                        <Select value={selectedQuarter?.toString()} onValueChange={(v) => {setSelectedQuarter(parseInt(v)); setSelectedMonth(undefined);}}>
+                        <Select value={selectedQuarter?.toString()} onValueChange={(v) => {setSelectedQuarter(v ? parseInt(v) : undefined); setSelectedMonth(undefined);}}>
                             <SelectTrigger id="quarter-select-export" className="col-span-3"><SelectValue placeholder="Pilih Triwulan" /></SelectTrigger>
-                            <SelectContent>{quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
+                            <SelectContent position="popper" side="bottom">{quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
                         </Select>
                     </div>
                   </div>
