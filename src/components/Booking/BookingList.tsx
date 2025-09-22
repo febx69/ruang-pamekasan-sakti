@@ -37,8 +37,8 @@ const BookingList = ({
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  
-  // Pisahkan state untuk setiap dialog untuk menghindari konflik
+
+  // State terpisah untuk setiap dialog
   const [deleteMonth, setDeleteMonth] = useState<number | undefined>();
   const [deleteQuarter, setDeleteQuarter] = useState<number | undefined>();
   const [exportMonth, setExportMonth] = useState<number | undefined>();
@@ -109,13 +109,13 @@ const BookingList = ({
   };
 
   const handleCancel = () => {
-    // Reset state saat dialog ditutup
+    // Reset state pilihan saat dialog ditutup/dibatalkan
     setDeleteMonth(undefined);
     setDeleteQuarter(undefined);
     setExportMonth(undefined);
     setExportQuarter(undefined);
   };
-  
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
       weekday: 'long',
@@ -158,7 +158,7 @@ const BookingList = ({
           
           {userRole === 'admin' && (
             <div className="flex flex-wrap gap-2">
-              <AlertDialog>
+              <AlertDialog onOpenChange={(open) => !open && handleCancel()}>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="sm" className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground">
                     <Archive size={16} className="mr-2" />
@@ -189,7 +189,7 @@ const BookingList = ({
                            if (v) setDeleteQuarter(undefined);
                          }}
                        >
-                          <SelectTrigger id="month-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Bulan" /></SelectTrigger>
+                          <SelectTrigger id="month-select-delete" className="col-span-3"><SelectValue placeholder="Semua Bulan" /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="">Semua Bulan</SelectItem>
                             {months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}
@@ -205,7 +205,7 @@ const BookingList = ({
                           if (v) setDeleteMonth(undefined);
                         }}
                       >
-                          <SelectTrigger id="quarter-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Triwulan" /></SelectTrigger>
+                          <SelectTrigger id="quarter-select-delete" className="col-span-3"><SelectValue placeholder="Semua Triwulan" /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="">Semua Triwulan</SelectItem>
                             {quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}
@@ -214,13 +214,13 @@ const BookingList = ({
                     </div>
                   </div>
                   <AlertDialogFooter>
-                    <AlertDialogCancel onClick={handleCancel}>Batal</AlertDialogCancel>
+                    <AlertDialogCancel>Batal</AlertDialogCancel>
                     <AlertDialogAction onClick={handleBulkDelete} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
 
-              <AlertDialog>
+              <AlertDialog onOpenChange={(open) => !open && handleCancel()}>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="sm" className="text-primary border-primary hover:bg-primary hover:text-primary-foreground">
                     <Download size={16} className="mr-2" />
@@ -251,7 +251,7 @@ const BookingList = ({
                             if (v) setExportQuarter(undefined);
                           }}
                         >
-                            <SelectTrigger id="month-select-export" className="col-span-3"><SelectValue placeholder="Pilih Bulan" /></SelectTrigger>
+                            <SelectTrigger id="month-select-export" className="col-span-3"><SelectValue placeholder="Semua Bulan" /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="">Semua Bulan</SelectItem>
                               {months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}
@@ -267,7 +267,7 @@ const BookingList = ({
                             if (v) setExportMonth(undefined);
                           }}
                         >
-                            <SelectTrigger id="quarter-select-export" className="col-span-3"><SelectValue placeholder="Pilih Triwulan" /></SelectTrigger>
+                            <SelectTrigger id="quarter-select-export" className="col-span-3"><SelectValue placeholder="Semua Triwulan" /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="">Semua Triwulan</SelectItem>
                               {quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}
@@ -276,7 +276,7 @@ const BookingList = ({
                     </div>
                   </div>
                   <AlertDialogFooter>
-                    <AlertDialogCancel onClick={handleCancel}>Batal</AlertDialogCancel>
+                    <AlertDialogCancel>Batal</AlertDialogCancel>
                     <AlertDialogAction onClick={handleExport}>Export</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
