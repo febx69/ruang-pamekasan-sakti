@@ -5,17 +5,20 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Calendar, Clock, MapPin, Search, Trash2, Edit, Users, Download, Archive } from "lucide-react";
 import { BookingData } from "./BookingForm";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PeriodOption } from "@/hooks/useSupabaseBookings";
 
 interface BookingListProps {
   bookings: BookingData[];
   onDelete?: (id: string) => Promise<{ success: boolean; error?: string }>;
   onEdit?: (booking: BookingData) => void;
-  onBulkDelete?: (period: 'month' | 'quarter' | 'year') => Promise<{ success: boolean; error?: string }>;
-  onExport?: (period: 'month' | 'quarter' | 'year') => void;
+  onBulkDelete?: (period: PeriodOption) => Promise<{ success: boolean; error?: string }>;
+  onExport?: (period: PeriodOption) => void;
   userRole: 'admin' | 'user';
   title: string;
   isLoading?: boolean;
@@ -33,6 +36,13 @@ const BookingList = ({
 }: BookingListProps) => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number | undefined>();
+  const [selectedQuarter, setSelectedQuarter] = useState<number | undefined>();
+
+  const years = Array.from(new Set(bookings.map(b => new Date(b.date).getFullYear()))).sort((a, b) => b - a);
+  const months = Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: new Date(0, i).toLocaleString('id-ID', { month: 'long' }) }));
+  const quarters = [{ value: 1, label: 'Triwulan 1 (Jan-Mar)' }, { value: 2, label: 'Triwulan 2 (Apr-Jun)' }, { value: 3, label: 'Triwulan 3 (Jul-Sep)' }, { value: 4, label: 'Triwulan 4 (Okt-Des)' }];
 
   const filteredBookings = bookings
     .filter(booking =>
@@ -68,15 +78,14 @@ const BookingList = ({
     }
   };
 
-  const handleBulkDelete = async (period: 'month' | 'quarter' | 'year') => {
-    if (!onBulkDelete) return;
-    
-    const result = await onBulkDelete(period);
+  const handleBulkDelete = async () => {
+    if (!onBulkDelete || !selectedYear) return;
+
+    const result = await onBulkDelete({ year: selectedYear, month: selectedMonth, quarter: selectedQuarter });
     if (result.success) {
-      const periodText = period === 'month' ? 'bulan' : period === 'quarter' ? 'triwulan' : 'tahun';
       toast({
         title: "Berhasil dihapus",
-        description: `Data peminjaman periode ${periodText} berhasil dihapus`,
+        description: `Data peminjaman berhasil dihapus`,
       });
     } else {
       toast({
@@ -86,13 +95,13 @@ const BookingList = ({
       });
     }
   };
-
-  const handleExport = (period: 'month' | 'quarter' | 'year') => {
-    onExport?.(period);
-    const periodText = period === 'month' ? 'bulan' : period === 'quarter' ? 'triwulan' : 'tahun';
+  
+  const handleExport = () => {
+    if (!onExport || !selectedYear) return;
+    onExport({ year: selectedYear, month: selectedMonth, quarter: selectedQuarter });
     toast({
       title: "Berhasil diunduh",
-      description: `Data peminjaman periode ${periodText} berhasil diunduh`,
+      description: `Data peminjaman berhasil diunduh`,
     });
   };
 
@@ -149,34 +158,35 @@ const BookingList = ({
                   <AlertDialogHeader>
                     <AlertDialogTitle>Arsipkan Data Peminjaman</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Ini akan menghapus data peminjaman yang sudah lewat. Pilih periode data yang ingin dihapus secara permanen:
+                      Pilih periode data yang ingin dihapus secara permanen.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <div className="flex flex-col gap-2">
-                    <Button 
-                      variant="destructive" 
-                      onClick={() => handleBulkDelete('month')}
-                      className="justify-start"
-                    >
-                      Hapus Data Lebih dari 1 Bulan
-                    </Button>
-                    <Button 
-                      variant="destructive" 
-                      onClick={() => handleBulkDelete('quarter')}
-                      className="justify-start"
-                    >
-                      Hapus Data Lebih dari 3 Bulan
-                    </Button>
-                    <Button 
-                      variant="destructive" 
-                      onClick={() => handleBulkDelete('year')}
-                      className="justify-start"
-                    >
-                      Hapus Data Lebih dari 1 Tahun
-                    </Button>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="year-select-delete" className="text-right">Tahun</Label>
+                      <Select value={selectedYear?.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
+                          <SelectTrigger id="year-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Tahun" /></SelectTrigger>
+                          <SelectContent>{years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="month-select-delete" className="text-right">Bulan (Opsional)</Label>
+                       <Select value={selectedMonth?.toString()} onValueChange={(v) => {setSelectedMonth(parseInt(v)); setSelectedQuarter(undefined);}}>
+                          <SelectTrigger id="month-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Bulan" /></SelectTrigger>
+                          <SelectContent>{months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                     <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="quarter-select-delete" className="text-right">Triwulan (Opsional)</Label>
+                      <Select value={selectedQuarter?.toString()} onValueChange={(v) => {setSelectedQuarter(parseInt(v)); setSelectedMonth(undefined);}}>
+                          <SelectTrigger id="quarter-select-delete" className="col-span-3"><SelectValue placeholder="Pilih Triwulan" /></SelectTrigger>
+                          <SelectContent>{quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Batal</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleBulkDelete} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -192,34 +202,35 @@ const BookingList = ({
                   <AlertDialogHeader>
                     <AlertDialogTitle>Export Data ke Excel</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Pilih periode data yang ingin diunduh:
+                      Pilih periode data yang ingin diunduh.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <div className="flex flex-col gap-2">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => handleExport('month')}
-                      className="justify-start"
-                    >
-                      Export Data 1 Bulan Terakhir
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => handleExport('quarter')}
-                      className="justify-start"
-                    >
-                      Export Data 3 Bulan Terakhir
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => handleExport('year')}
-                      className="justify-start"
-                    >
-                      Export Data 1 Tahun Terakhir
-                    </Button>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="year-select-export" className="text-right">Tahun</Label>
+                        <Select value={selectedYear?.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
+                            <SelectTrigger id="year-select-export" className="col-span-3"><SelectValue placeholder="Pilih Tahun" /></SelectTrigger>
+                            <SelectContent>{years.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="month-select-export" className="text-right">Bulan (Opsional)</Label>
+                        <Select value={selectedMonth?.toString()} onValueChange={(v) => {setSelectedMonth(parseInt(v)); setSelectedQuarter(undefined);}}>
+                            <SelectTrigger id="month-select-export" className="col-span-3"><SelectValue placeholder="Pilih Bulan" /></SelectTrigger>
+                            <SelectContent>{months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="quarter-select-export" className="text-right">Triwulan (Opsional)</Label>
+                        <Select value={selectedQuarter?.toString()} onValueChange={(v) => {setSelectedQuarter(parseInt(v)); setSelectedMonth(undefined);}}>
+                            <SelectTrigger id="quarter-select-export" className="col-span-3"><SelectValue placeholder="Pilih Triwulan" /></SelectTrigger>
+                            <SelectContent>{quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </div>
                   </div>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Batal</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleExport}>Export</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
