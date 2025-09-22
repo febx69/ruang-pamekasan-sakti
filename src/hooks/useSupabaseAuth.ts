@@ -11,17 +11,37 @@ export const useSupabaseAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fungsi logout sekarang juga membersihkan timestamp
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('loginTimestamp');
+  };
+
   useEffect(() => {
-    // Check for saved user in localStorage
     const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error('Error parsing saved user:', error);
-        localStorage.removeItem('currentUser');
+    const loginTimestamp = localStorage.getItem('loginTimestamp');
+    const maxSessionTime = 24 * 60 * 60 * 1000; // 24 jam dalam milidetik
+
+    if (savedUser && loginTimestamp) {
+      const lastLoginTime = parseInt(loginTimestamp, 10);
+      const currentTime = Date.now();
+
+      // Cek apakah sesi sudah lebih dari 24 jam
+      if (currentTime - lastLoginTime > maxSessionTime) {
+        // Jika sudah kedaluwarsa, panggil logout
+        logout();
+      } else {
+        try {
+          setUser(JSON.parse(savedUser));
+        } catch (error) {
+          console.error('Error parsing saved user:', error);
+          // Jika ada error, bersihkan semuanya
+          logout();
+        }
       }
     }
+    
     setIsLoading(false);
   }, []);
 
@@ -47,16 +67,13 @@ export const useSupabaseAuth = () => {
       
       setUser(userData);
       localStorage.setItem('currentUser', JSON.stringify(userData));
+      // Simpan timestamp saat berhasil login
+      localStorage.setItem('loginTimestamp', Date.now().toString());
       return true;
     } catch (error) {
       console.error('Login error:', error);
       return false;
     }
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('currentUser');
   };
 
   return {
