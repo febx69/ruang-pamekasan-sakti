@@ -175,17 +175,23 @@ const BookingList = ({
                       </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="month-select-delete" className="text-right">Bulan (Opsional)</Label>
-                       <Select value={selectedMonth?.toString()} onValueChange={(v) => {setSelectedMonth(v ? parseInt(v) : undefined); setSelectedQuarter(undefined);}}>
+                      <Label htmlFor="month-select-delete" className="text-right">Bulan</Label>
+                       <Select value={selectedMonth?.toString() ?? ""} onValueChange={(v) => {setSelectedMonth(v ? parseInt(v) : undefined); setSelectedQuarter(undefined);}}>
                           <SelectTrigger id="month-select-delete" className="col-span-3"><SelectValue placeholder="Semua bulan" /></SelectTrigger>
-                          <SelectContent position="item-aligned">{months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
+                          <SelectContent position="item-aligned">
+                            <SelectItem value="">Semua bulan</SelectItem>
+                            {months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}
+                          </SelectContent>
                       </Select>
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="quarter-select-delete" className="text-right">Triwulan (Opsional)</Label>
-                      <Select value={selectedQuarter?.toString()} onValueChange={(v) => {setSelectedQuarter(v ? parseInt(v) : undefined); setSelectedMonth(undefined);}}>
+                      <Label htmlFor="quarter-select-delete" className="text-right">Triwulan</Label>
+                      <Select value={selectedQuarter?.toString() ?? ""} onValueChange={(v) => {setSelectedQuarter(v ? parseInt(v) : undefined); setSelectedMonth(undefined);}}>
                           <SelectTrigger id="quarter-select-delete" className="col-span-3"><SelectValue placeholder="Semua triwulan" /></SelectTrigger>
-                          <SelectContent position="item-aligned">{quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
+                          <SelectContent position="item-aligned">
+                            <SelectItem value="">Semua triwulan</SelectItem>
+                            {quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}
+                          </SelectContent>
                       </Select>
                     </div>
                   </div>
@@ -219,17 +225,23 @@ const BookingList = ({
                         </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="month-select-export" className="text-right">Bulan (Opsional)</Label>
-                        <Select value={selectedMonth?.toString()} onValueChange={(v) => {setSelectedMonth(v ? parseInt(v) : undefined); setSelectedQuarter(undefined);}}>
+                        <Label htmlFor="month-select-export" className="text-right">Bulan</Label>
+                        <Select value={selectedMonth?.toString() ?? ""} onValueChange={(v) => {setSelectedMonth(v ? parseInt(v) : undefined); setSelectedQuarter(undefined);}}>
                             <SelectTrigger id="month-select-export" className="col-span-3"><SelectValue placeholder="Semua bulan" /></SelectTrigger>
-                            <SelectContent position="item-aligned">{months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
+                            <SelectContent position="item-aligned">
+                              <SelectItem value="">Semua bulan</SelectItem>
+                              {months.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}
+                            </SelectContent>
                         </Select>
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="quarter-select-export" className="text-right">Triwulan (Opsional)</Label>
-                        <Select value={selectedQuarter?.toString()} onValueChange={(v) => {setSelectedQuarter(v ? parseInt(v) : undefined); setSelectedMonth(undefined);}}>
+                        <Label htmlFor="quarter-select-export" className="text-right">Triwulan</Label>
+                        <Select value={selectedQuarter?.toString() ?? ""} onValueChange={(v) => {setSelectedQuarter(v ? parseInt(v) : undefined); setSelectedMonth(undefined);}}>
                             <SelectTrigger id="quarter-select-export" className="col-span-3"><SelectValue placeholder="Semua triwulan" /></SelectTrigger>
-                            <SelectContent position="item-aligned">{quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}</SelectContent>
+                            <SelectContent position="item-aligned">
+                              <SelectItem value="">Semua triwulan</SelectItem>
+                              {quarters.map(q => <SelectItem key={q.value} value={q.value.toString()}>{q.label}</SelectItem>)}
+                            </SelectContent>
                         </Select>
                     </div>
                   </div>
