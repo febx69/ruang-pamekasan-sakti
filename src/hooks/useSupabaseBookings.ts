@@ -166,7 +166,6 @@ export const useSupabaseBookings = (user: User | null) => {
         return { success: false, error: 'Gagal menambah peminjaman' };
       }
       
-      // No need to fetch here, real-time will handle it
       return { success: true };
     } catch (error) {
       console.error('Error adding booking:', error);
@@ -213,7 +212,6 @@ export const useSupabaseBookings = (user: User | null) => {
         return { success: false, error: 'Gagal memperbarui peminjaman' };
       }
       
-      // No need to fetch here, real-time will handle it
       return { success: true };
     } catch (error) {
       console.error('Error updating booking:', error);
@@ -235,7 +233,6 @@ export const useSupabaseBookings = (user: User | null) => {
         return { success: false, error: 'Gagal menghapus peminjaman' };
       }
 
-      // No need to fetch here, real-time will handle it
       return { success: true };
     } catch (error) {
       console.error('Error deleting booking:', error);
@@ -243,27 +240,51 @@ export const useSupabaseBookings = (user: User | null) => {
     }
   };
 
+  // --- PERBAIKAN UTAMA DI SINI ---
   const bulkDeleteByPeriod = async (period: PeriodOption): Promise<{ success: boolean; error?: string }> => {
     if (!user || user.role !== 'admin') return { success: false, error: 'Unauthorized' };
 
     try {
       let query = supabase.from('bookings').delete();
 
+      // Gunakan String manipulation untuk tanggal agar aman dari timezone
       if (period.year) {
+        const yearStr = period.year.toString();
+        
         if (period.month) {
-          const startDate = new Date(period.year, period.month - 1, 1);
-          const endDate = new Date(period.year, period.month, 0);
-          query = query.gte('date', startDate.toISOString().split('T')[0]);
-          query = query.lte('date', endDate.toISOString().split('T')[0]);
+          // Format MM harus 2 digit: 01, 02, dst.
+          const monthStr = period.month.toString().padStart(2, '0');
+          // Filter start: YYYY-MM-01
+          const startStr = `${yearStr}-${monthStr}-01`;
+          
+          // Cari tanggal terakhir bulan tersebut
+          // new Date(y, m, 0).getDate() memberikan jumlah hari di bulan m
+          const lastDay = new Date(period.year, period.month, 0).getDate();
+          const endStr = `${yearStr}-${monthStr}-${lastDay}`;
+          
+          query = query.gte('date', startStr);
+          query = query.lte('date', endStr);
+          
         } else if (period.quarter) {
-          const startMonth = (period.quarter - 1) * 3;
-          const startDate = new Date(period.year, startMonth, 1);
-          const endDate = new Date(period.year, startMonth + 3, 0);
-          query = query.gte('date', startDate.toISOString().split('T')[0]);
-          query = query.lte('date', endDate.toISOString().split('T')[0]);
+          const startMonth = (period.quarter - 1) * 3 + 1; // 1, 4, 7, 10
+          const endMonth = startMonth + 2; // 3, 6, 9, 12
+          
+          const startMonthStr = startMonth.toString().padStart(2, '0');
+          const endMonthStr = endMonth.toString().padStart(2, '0');
+          
+          // Hari terakhir di bulan akhir triwulan
+          const lastDay = new Date(period.year, endMonth, 0).getDate();
+          
+          const startStr = `${yearStr}-${startMonthStr}-01`;
+          const endStr = `${yearStr}-${endMonthStr}-${lastDay}`;
+          
+          query = query.gte('date', startStr);
+          query = query.lte('date', endStr);
+          
         } else {
-          query = query.gte('date', `${period.year}-01-01`);
-          query = query.lte('date', `${period.year}-12-31`);
+          // Setahun penuh
+          query = query.gte('date', `${yearStr}-01-01`);
+          query = query.lte('date', `${yearStr}-12-31`);
         }
       } else {
           return { success: false, error: 'Tahun harus dipilih' };
@@ -279,15 +300,16 @@ export const useSupabaseBookings = (user: User | null) => {
       await fetchBookings();
       return { success: true };
     } catch (error) {
-      console.error('Error bulk deleting:', error);
-      return { success: false, error: 'Gagal menghapus data massal' };
+      console.error('Error bulk deleting (Catch):', error);
+      return { success: false, error: 'Terjadi kesalahan sistem saat menghapus data' };
     }
   };
 
   const getActiveBookings = () => {
     const now = new Date();
-    
     return bookings.filter(booking => {
+      // Pastikan format tanggal valid sebelum parsing
+      if(!booking.date) return false;
       const endDateTime = new Date(`${booking.date}T${booking.endTime}`);
       return endDateTime > now;
     });
@@ -297,48 +319,64 @@ export const useSupabaseBookings = (user: User | null) => {
     return bookings;
   };
 
+  // --- PERBAIKAN EXPORT ---
   const exportToExcel = async (period: PeriodOption) => {
-    let filteredBookings = bookings;
+    try {
+      let filteredBookings = [...bookings]; // Copy array agar aman
 
-    if (period.year) {
-        filteredBookings = filteredBookings.filter(booking => {
-            const bookingYear = new Date(booking.date).getFullYear();
-            return bookingYear === period.year;
-        });
+      if (period.year) {
+          filteredBookings = filteredBookings.filter(booking => {
+              // Validasi data
+              if (!booking.date) return false;
+              // Gunakan string parsing yang lebih aman daripada Date object
+              const bookingYear = parseInt(booking.date.substring(0, 4));
+              return bookingYear === period.year;
+          });
 
-        if (period.month) {
-            filteredBookings = filteredBookings.filter(booking => {
-                const bookingMonth = new Date(booking.date).getMonth() + 1;
-                return bookingMonth === period.month;
-            });
-        } else if (period.quarter) {
-            const startMonth = (period.quarter - 1) * 3 + 1;
-            const endMonth = startMonth + 2;
-            filteredBookings = filteredBookings.filter(booking => {
-                const bookingMonth = new Date(booking.date).getMonth() + 1;
-                return bookingMonth >= startMonth && bookingMonth <= endMonth;
-            });
-        }
+          if (period.month) {
+              filteredBookings = filteredBookings.filter(booking => {
+                  if (!booking.date) return false;
+                  // Format YYYY-MM-DD, ambil MM (index 5-7)
+                  const bookingMonth = parseInt(booking.date.substring(5, 7));
+                  return bookingMonth === period.month;
+              });
+          } else if (period.quarter) {
+              const startMonth = (period.quarter - 1) * 3 + 1;
+              const endMonth = startMonth + 2;
+              filteredBookings = filteredBookings.filter(booking => {
+                  if (!booking.date) return false;
+                  const bookingMonth = parseInt(booking.date.substring(5, 7));
+                  return bookingMonth >= startMonth && bookingMonth <= endMonth;
+              });
+          }
+      }
+      
+      const csvContent = [
+        ['Tanggal', 'Nama Peminjam', 'Ruangan', 'Waktu Mulai', 'Waktu Selesai', 'Keterangan'],
+        ...filteredBookings.map(booking => [
+          `"${booking.date}"`, // Quote strings agar aman di CSV
+          `"${booking.name.replace(/"/g, '""')}"`, // Escape quotes
+          `"${booking.room}"`,
+          booking.startTime,
+          booking.endTime,
+          `"${(booking.description || '').replace(/"/g, '""')}"`
+        ])
+      ].map(row => row.join(',')).join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `peminjaman-ruangan-${period.year}${period.month ? '-bulan-'+period.month : ''}.csv`;
+      document.body.appendChild(a); // Append ke body agar click works di Firefox
+      a.click();
+      document.body.removeChild(a); // Cleanup
+      window.URL.revokeObjectURL(url); // Free memory
+      
+    } catch (e) {
+      console.error("Export Error:", e);
+      // Tidak throw error agar aplikasi tidak crash
     }
-    
-    const csvContent = [
-      ['Tanggal', 'Nama Peminjam', 'Ruangan', 'Waktu Mulai', 'Waktu Selesai', 'Keterangan'],
-      ...filteredBookings.map(booking => [
-        booking.date,
-        booking.name,
-        booking.room,
-        booking.startTime,
-        booking.endTime,
-        booking.description
-      ])
-    ].map(row => row.join(',')).join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.setAttribute('href', url);
-    a.setAttribute('download', `peminjaman-ruangan.csv`);
-    a.click();
   };
 
   return {
